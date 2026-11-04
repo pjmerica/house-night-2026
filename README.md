@@ -49,3 +49,9 @@ The job runs through Dec 14 (a pass every 2 minutes; each job dispatches the nex
 The `live` branch keeps `hist.json` (each race's path: time, share counted, margin, projection, chance, Kalshi ask) and
 `snapshots/` (the whole board at most every 10 minutes when it changed: both sides' prices, edges, FLIPs, counties still
 out). Every district's NYT file, by county, is recorded by polling-agg's cloud job in the release `election-night-2026`.
+
+## The record of recommendations, and the night in review
+
+`signals.csv` on the `live` branch (since 2026-11-04 2:50 pm ET): every FLIP and board recommendation as the page showed it, one row each time one appears, ends, turns into or out of a FLIP, or its ask moves 1c+. Before that, nothing logged the board.
+
+`review.html` replays the whole House through the night from recordings (`build_review.py`: NYT's state pages from the release `election-night-2026`, Kalshi's minute candles from its `kalshi-minutes-*` asset, `hist.json`, `live.json`): expected seats, what the board said at each moment, and the profit if every recommendation was bought. Re-run when the count is done; the page says what is recorded and what is recomputed.

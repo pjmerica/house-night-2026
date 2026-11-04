@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The House on election night 2026: every recommendation, replayed</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #0c1016; --panel: #131922; --panel2: #18202b; --line: #232c39; --line2: #2f3a4a;
+  --text: #e7ebf1; --muted: #a3adbb; --faint: #7a8596;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181;
+  --mono: "Cascadia Mono", "SF Mono", Consolas, ui-monospace, monospace;
+  --sans: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 var(--sans); font-variant-numeric: tabular-nums; }
+header { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+h1 { font-size: 18px; margin: 0; }
+a { color: #8fbdf2; }
+.note { color: var(--muted); font-size: 12.5px; }
+.fine { color: var(--faint); font-size: 12px; }
+main { padding: 12px 16px 28px; display: grid; gap: 12px; max-width: 1500px; margin: 0 auto; }
+section { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; display: grid; gap: 8px; min-width: 0; }
+h2 { font-size: 15px; margin: 0; }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 12px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+button { background: var(--panel2); color: var(--text); border: 1px solid var(--line2); border-radius: 6px; padding: 5px 10px; font: inherit; cursor: pointer; }
+button[aria-pressed="true"] { background: #2a3550; border-color: #5a6a8a; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+.tile { background: var(--panel2); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; }
+.tile small { display: block; color: var(--muted); font-size: 11.5px; }
+.tile b { font: 600 21px var(--mono); }
+input[type=range] { width: 100%; accent-color: #8fbdf2; }
+.wchart { width: 100%; height: auto; display: block; }
+.wchart text { fill: var(--faint); font: 11px var(--sans); }
+.clegend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--muted); }
+.clegend i { display: inline-block; width: 16px; height: 3px; border-radius: 2px; margin-right: 6px; vertical-align: 3px; }
+.clegend i.dash { background: none !important; border-top: 2px dashed; height: 0; }
+.tw { overflow: auto; max-height: 420px; }
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+th { color: var(--muted); font-weight: 500; text-align: right; padding: 4px 6px; border-bottom: 1px solid var(--line2); position: sticky; top: 0; background: var(--panel); white-space: nowrap; }
+th[data-s] { cursor: pointer; }
+td { font-family: var(--mono); text-align: right; padding: 3px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; font-family: var(--sans); }
+td.nm { font-family: var(--sans); text-align: left; }
+th.nm { text-align: left; }
+.flipb { font: 700 10.5px var(--sans); color: #1a1205; background: #f3c46b; border-radius: 3px; padding: 0 5px; margin-left: 5px; }
+.res { font-family: var(--sans); }
+#tip { position: fixed; pointer-events: none; z-index: 20; background: #0f141c; border: 1px solid var(--line2); border-radius: 6px; padding: 7px 10px; font-size: 12.5px; min-width: 190px; }
+#tip[hidden] { display: none; }
+#tip .kv { display: grid; grid-template-columns: 1fr auto; gap: 1px 14px; margin-top: 3px; }
+#tip .kv span { color: var(--muted); } #tip .kv b { font: 500 12.5px var(--mono); text-align: right; }
+.mark { display: inline-block; width: 10px; height: 3px; border-radius: 2px; margin-right: 6px; vertical-align: 3px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>The House on election night, replayed</h1>
+  <span class="note" id="asof"></span>
+  <a href="index.html" style="margin-left:auto">← House desk</a>
+</header>
+<main>
+  <section>
+    <div class="chips"><span class="note">Projection used:</span>
+      <button data-src="all" aria-pressed="true">All night (recomputed)</button>
+      <button data-src="shown" aria-pressed="false">As shown on the page</button>
+    </div>
+    <p class="note" id="srcnote" style="margin:0"></p>
+    <div class="tiles" id="tiles"></div>
+  </section>
+  <section>
+    <h2 id="clock"></h2>
+    <input type="range" id="slider" min="0" value="0" aria-label="Time on election night">
+    <div class="chips"><button id="play">▶ Play</button><span class="note">Drag or play: the tiles below and the board show what was known at that moment.</span></div>
+    <div class="tiles" id="now"></div>
+  </section>
+  <div class="two">
+    <section><h2>Democratic seats through the night</h2><div id="seatchart"></div>
+      <p class="fine" style="margin:0">Expected seats = races NYT had called, plus each uncalled race's chance. 218 is a majority. The dashed line is the seats NYT had called for Democrats by then; it enters the chart once it passes 205. The dotted line is the Democratic seats called now; more are still uncalled.</p></section>
+    <section><h2>Profit if every recommendation was bought</h2><div id="pnlchart"></div>
+      <p class="fine" style="margin:0">One contract per recommendation at the ask first shown, after Kalshi's fee, valued at the bid each moment, then $1 or $0 from NYT's call. Counts positions open at that moment. The groups by price add up to the whole board; FLIPs are also on the board.</p></section>
+  </div>
+  <section><h2 id="boardh"></h2><div class="tw" id="boardt"></div></section>
+  <section>
+    <h2>How each group finished</h2><div class="tw" id="scoret"></div>
+    <p class="fine" style="margin:0" id="scorenote"></p>
+  </section>
+  <section>
+    <h2>Every recommendation</h2>
+    <div class="chips"><button data-kind="flip" aria-pressed="true">FLIPs</button><button data-kind="board" aria-pressed="false">Whole board</button></div>
+    <div class="tw" id="sigt"></div>
+    <p class="fine" style="margin:0">First shown: the first moment that race and side qualified. Won or lost: NYT's call, else Kalshi's settlement. Open: value at the last Kalshi bid. Click a heading to sort.</p>
+  </section>
+  <section><h2>What this is, and isn't</h2>
+    <ul class="note" style="margin:0;padding-left:18px">
+      <li><b>From recordings:</b> each district's count and NYT's calls (state pages, about every 10 minutes), and Kalshi's bid and ask for both sides (minute by minute).</li>
+      <li><b>All night (recomputed):</b> the live job's own district-total projection, run on each moment's count from the first poll close. No later information goes in. The page itself didn't exist before 10:28 pm ET and had no Kalshi until 11:07 pm, so this is what those rules would have said.</li>
+      <li><b>As shown:</b> the chance the page actually published: district totals until 12:08 am ET, county by county after that. The job was down from 5:48 am to 2:14 pm ET on Nov 4, so nothing new appears then. Its FLIP guard is approximated with the margin so far, and that guard changed during the night, so this isn't the page row for row.</li>
+      <li><b>Not here:</b> county-by-county projections before they ran. The only county path for those hours is built from final results, which would leak the answer.</li>
+      <li><b>Fills are optimistic:</b> every signal is filled in full at the ask, ignoring book depth. One night, and races moved together, so these groups are far from independent.</li>
+    </ul>
+  </section>
+</main>
+<div id="tip" hidden></div>
+<script src="review_data.js"></script>
+<script>
+"use strict";
+const R = window.REVIEW;
+const ui = { src: "all", i: 0, kind: "flip", sort: "t", dir: 1, timer: null };
+const et = iso => new Date(iso).toLocaleString("en-US", { timeZone: "America/New_York", weekday: "short", hour: "numeric", minute: "2-digit" });
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const cents = p => p == null ? "–" : (Math.abs(100 * p - Math.round(100 * p)) > 0.05 ? (100 * p).toFixed(1) : (100 * p).toFixed(0)) + "¢";
+const money = v => (v >= 0 ? "+$" : "−$") + Math.abs(v).toFixed(2);
+const pcts = p => (100 * p).toFixed(0) + "%";
+const COL = { s1: "var(--s1)", s2: "var(--s2)", s3: "var(--s3)", s4: "var(--s4)", s5: "var(--s5)" };
+
+function lineChart(el, id, series, opts) {
+  const W = 680, H = 270, l = 44, r = 12, t = 10, b = 24, n = R.ticks.length;
+  const vals = series.flatMap(s => s.v.filter(x => x != null)).concat(opts.refs ? opts.refs.map(x => x.y) : []);
+  let lo = Math.min(...vals), hi = Math.max(...vals);
+  const pad = (hi - lo) * 0.06 || 1; lo -= pad; hi += pad;
+  const stepRaw = (hi - lo) / 5, mag = Math.pow(10, Math.floor(Math.log10(stepRaw))), st = [1, 2, 5, 10].map(x => x * mag).find(x => x >= stepRaw);
+  const X = i => l + (W - l - r) * i / (n - 1), Y = v => t + (H - t - b) * (1 - (v - lo) / (hi - lo));
+  let g = "";
+  for (let v = Math.ceil(lo / st) * st; v <= hi; v += st) g += `<line x1="${l}" x2="${W - r}" y1="${Y(v)}" y2="${Y(v)}" stroke="${Math.abs(v) < 1e-9 ? "#46536a" : "#1f2733"}"/><text x="${l - 6}" y="${Y(v) + 4}" text-anchor="end">${opts.fmt(Math.round(v * 100) / 100)}</text>`;
+  for (let k = 0; k < n; k += Math.ceil(n / 7)) g += `<text x="${X(k)}" y="${H - 6}" text-anchor="middle">${esc(et(R.ticks[k]).replace(/^\w+, /, ""))}</text>`;
+  for (const c of opts.refs || []) if (c.y >= lo && c.y <= hi) g += `<line x1="${l}" x2="${W - r}" y1="${Y(c.y)}" y2="${Y(c.y)}" stroke="#8e99aa" stroke-dasharray="${c.dash}"/><text x="${W - r}" y="${Y(c.y) - 4}" text-anchor="end">${esc(c.label)}</text>`;
+  for (const s of series) {
+    let d = "", pen = false;
+    s.v.forEach((v, i) => { if (v == null) { pen = false; return; } d += (pen ? "L" : "M") + X(i).toFixed(1) + "," + Y(v).toFixed(1); pen = true; });
+    g += `<path d="${d}" fill="none" stroke="${s.c}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" ${s.dash ? `stroke-dasharray="${s.dash}"` : ""}/>`;
+  }
+  g += `<line class="now" x1="${X(ui.i)}" x2="${X(ui.i)}" y1="${t}" y2="${H - b}" stroke="#c7d0dc"/>`;
+  g += `<rect x="${l}" y="${t}" width="${W - l - r}" height="${H - t - b}" fill="transparent" data-ch="${id}"/>`;
+  el.innerHTML = `<svg class="wchart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opts.aria)}">${g}</svg>` +
+    `<div class="clegend">${series.map(s => `<span><i class="${s.dash ? "dash" : ""}" style="${s.dash ? `border-color:${s.c}` : `background:${s.c}`}"></i>${esc(s.label)}</span>`).join("")}</div>`;
+  el._h = { series, opts, X, W, l, r };
+}
+
+function seatSeries() {
+  const s = R.seats;
+  return [
+    { label: "Expected: our projection, all night", v: s.all, c: COL.s1 },
+    { label: "Expected: our projection, as shown", v: s.shown, c: COL.s3 },
+    { label: "Expected: Kalshi's prices", v: s.kalshi, c: COL.s4 },
+    { label: "Called for Democrats (NYT)", v: s.called_d.map(v => v >= 205 ? v : null), c: "#c7d0dc", dash: "2 4" },
+  ];
+}
+function pnlSeries() {
+  const c = R.curves[ui.src];
+  return [
+    { label: "Ask 80¢+", v: c.over80, c: COL.s1 }, { label: "Ask 40–80¢", v: c["40to80"], c: COL.s2 },
+    { label: "Ask under 40¢", v: c.under40, c: COL.s3 }, { label: "FLIPs", v: c.flip, c: COL.s4 }, { label: "Whole board", v: c.board, c: COL.s5 },
+  ];
+}
+function renderCharts() {
+  lineChart(document.getElementById("seatchart"), "seat", seatSeries(), { fmt: v => v, aria: "Expected Democratic seats through the night", refs: [{ y: 218, label: "218: majority", dash: "4 3" }, { y: R.final.d, label: `${R.final.d} called now`, dash: "1 4" }] });
+  lineChart(document.getElementById("pnlchart"), "pnl", pnlSeries(), { fmt: v => (v < 0 ? "−$" : "$") + Math.abs(v), aria: "Profit through the night by group of recommendations", refs: [] });
+}
+function tiles() {
+  const t = R.table[ui.src], last = R.ticks.length - 1;
+  const row = (lab, a) => `<div class="tile"><small>${lab}</small><b>${a.settled ? a.won + " / " + a.settled : "–"}</b><small>${money(a.pnl)} settled${a.open ? " · " + a.open + " open" : ""}</small></div>`;
+  document.getElementById("tiles").innerHTML = row("FLIPs won", t.flip) + row("Whole board won", t.board) + row("Ask under 40¢", t.under40) + row("Ask 40–80¢", t["40to80"]) + row("Ask 80¢+", t.over80) +
+    `<div class="tile"><small>Called so far, D–R</small><b>${R.final.d}–${R.final.r}</b><small>${R.final.open} not called · Kalshi expects ${R.seats.kalshi[last]}</small></div>`;
+  document.getElementById("srcnote").textContent = ui.src === "all" ? "The live job's district-total projection on each moment's count, from the first poll close. What the rules would have said all night; the page itself started later." :
+    "The chance the page actually published, from 10:28 pm ET; Kalshi appeared on it at 11:07 pm, and it was down 5:48 am to 2:14 pm ET. Signals here start when its numbers do, so earlier moves aren't counted.";
+}
+function renderNow() {
+  const i = ui.i, s = R.seats, c = R.curves[ui.src];
+  document.getElementById("clock").textContent = et(R.ticks[i]) + " ET";
+  const tile = (lab, v, sub) => `<div class="tile"><small>${lab}</small><b>${v}</b><small>${sub || ""}</small></div>`;
+  document.getElementById("now").innerHTML = tile("Called", `${s.called_d[i]}–${s.called_r[i]}`, "Democrats–Republicans") +
+    tile("Expected D seats: ours", ui.src === "shown" ? (s.shown[i] ?? "–") : s.all[i], ui.src === "shown" ? "as shown" : "all night") + tile("Expected D seats: Kalshi", s.kalshi[i]) +
+    tile("FLIPs live now", R.flips[ui.src][i]) + tile("FLIP profit so far", money(c.flip[i])) + tile("Whole board so far", money(c.board[i]));
+  const rows = R.board[ui.src][i];
+  document.getElementById("boardh").textContent = `What the board said at ${et(R.ticks[i])} ET (${rows.length ? "biggest edges, FLIPs first" : "nothing qualified"})`;
+  document.getElementById("boardt").innerHTML = rows.length ? `<table><thead><tr><th class="nm">Buy</th><th>Race</th><th>Counted</th><th>Margin so far</th><th>Ask</th><th>Our chance</th><th>Edge</th></tr></thead><tbody>` +
+    rows.map(x => { const r = R.races[x[0]], nm = x[1] === "D" ? r.d : r.r; return `<tr><td class="nm">${esc(nm)}${x[5] ? '<span class="flipb">FLIP</span>' : ""}</td><td>${esc(r.k)}</td><td>${x[6]}%</td><td>${x[7] == null ? "–" : (x[7] > 0 ? "D+" : "R+") + Math.abs(x[7]).toFixed(1)}</td><td>${cents(x[2])}</td><td>${pcts(x[3])}</td><td>+${(100 * x[4]).toFixed(0)}¢</td></tr>`; }).join("") + `</tbody></table>` : `<p class="note" style="margin:0">Nothing 3¢+ off at this moment${ui.src === "shown" ? " (or the page's job wasn't running)" : ""}.</p>`;
+  for (const id of ["seatchart", "pnlchart"]) {
+    const e = document.getElementById(id), now = e.querySelector(".now");
+    if (now && e._h) { now.setAttribute("x1", e._h.X(i)); now.setAttribute("x2", e._h.X(i)); }
+  }
+}
+function scoreTable() {
+  const t = R.table[ui.src], names = [["flip", "FLIPs"], ["board", "Whole board"], ["under40", "  Ask under 40¢"], ["40to80", "  Ask 40–80¢"], ["over80", "  Ask 80¢+"]];
+  document.getElementById("scoret").innerHTML = `<table><thead><tr><th class="nm">Group</th><th>Signals</th><th>Settled</th><th>Won</th><th>Prices implied</th><th>Cost</th><th>Profit</th><th>Return</th><th>Open</th><th>Open, at today's bid</th></tr></thead><tbody>` +
+    names.map(([k, lab]) => { const a = t[k]; return `<tr><td class="nm" style="padding-left:${lab.startsWith(" ") ? 18 : 6}px">${esc(lab.trim())}</td><td>${a.n}</td><td>${a.settled}</td><td>${a.won}</td><td>${a.implied}</td><td>$${a.cost.toFixed(2)}</td><td>${money(a.pnl)}</td><td>${a.cost ? (100 * a.pnl / a.cost).toFixed(0) + "%" : "–"}</td><td>${a.open}</td><td>${a.open ? money(a.open_mark) : "–"}</td></tr>`; }).join("") + `</tbody></table>`;
+  document.getElementById("scorenote").textContent = "Prices implied: how many wins the prices paid expected. Races that have settled so far skew to the clear-cut ones; the close ones are still open, so re-read this when the count is done.";
+}
+const SIGK = { t: x => x.t, k: x => x.k, name: x => x.name, pct: x => x.pct, ask: x => x.ask, ours: x => x.ours, edge: x => x.edge, res: x => x.won === null ? 1 : x.won ? 2 : 0, now: x => x.won === null ? x.now : x.won ? 1 : 0 };
+function sigTable() {
+  const list = R.signals.filter(x => x.src === ui.src && x.kind === ui.kind).sort((a, b) => { const f = SIGK[ui.sort], p = f(a), q = f(b); return (p < q ? -1 : p > q ? 1 : 0) * ui.dir; });
+  const th = (k, l, c) => `<th data-s="${k}" class="${c || ""}" ${ui.sort === k ? `aria-sort="${ui.dir > 0 ? "ascending" : "descending"}"` : ""}>${l}${ui.sort === k ? (ui.dir > 0 ? " ▲" : " ▼") : ""}</th>`;
+  document.getElementById("sigt").innerHTML = `<table><thead><tr>${th("t", "First shown")}${th("k", "Race", "nm")}${th("name", "Buy", "nm")}${th("pct", "Counted")}<th>Margin then</th>${th("ask", "Ask")}${th("ours", "Our chance")}${th("edge", "Edge")}${th("res", "Result", "nm")}${th("now", "Worth now")}</tr></thead><tbody>` +
+    list.map(x => `<tr><td>${esc(et(x.t))}</td><td class="nm">${esc(x.k)}</td><td class="nm">${esc(x.name)}</td><td>${x.pct.toFixed(0)}%</td><td>${x.m == null ? "–" : (x.m > 0 ? "D+" : "R+") + Math.abs(x.m).toFixed(1)}</td><td>${cents(x.ask)}</td><td>${pcts(x.ours)}</td><td>+${(100 * x.edge).toFixed(0)}¢</td><td class="nm res">${x.won === null ? "Open" : x.won ? "Won" : "Lost"}</td><td>${x.won === null ? cents(x.now) : x.won ? "$1" : "$0"}</td></tr>`).join("") + `</tbody></table>`;
+}
+function renderAll() { tiles(); renderCharts(); renderNow(); scoreTable(); sigTable(); }
+
+const slider = document.getElementById("slider");
+slider.max = R.ticks.length - 1;
+ui.i = R.ticks.length - 1; slider.value = ui.i;
+slider.addEventListener("input", () => { ui.i = +slider.value; renderNow(); });
+document.getElementById("play").addEventListener("click", e => {
+  if (ui.timer) { clearInterval(ui.timer); ui.timer = null; e.target.textContent = "▶ Play"; return; }
+  if (ui.i >= R.ticks.length - 1) ui.i = 0;
+  e.target.textContent = "❚❚ Pause";
+  ui.timer = setInterval(() => { ui.i++; slider.value = ui.i; renderNow(); if (ui.i >= R.ticks.length - 1) { clearInterval(ui.timer); ui.timer = null; e.target.textContent = "▶ Play"; } }, 180);
+});
+document.addEventListener("click", e => {
+  const b = e.target.closest("button[data-src]");
+  if (b) { ui.src = b.dataset.src; document.querySelectorAll("button[data-src]").forEach(x => x.setAttribute("aria-pressed", x === b)); renderAll(); return; }
+  const k = e.target.closest("button[data-kind]");
+  if (k) { ui.kind = k.dataset.kind; document.querySelectorAll("button[data-kind]").forEach(x => x.setAttribute("aria-pressed", x === k)); sigTable(); return; }
+  const h = e.target.closest("th[data-s]");
+  if (h) { if (ui.sort === h.dataset.s) ui.dir = -ui.dir; else { ui.sort = h.dataset.s; ui.dir = h.dataset.s === "edge" ? -1 : 1; } sigTable(); }
+});
+const tip = document.getElementById("tip");
+document.addEventListener("mousemove", e => {
+  const rect = e.target.closest ? e.target.closest("rect[data-ch]") : null;
+  if (!rect) { tip.hidden = true; return; }
+  const el = rect.closest("div"), h = el._h, bb = rect.ownerSVGElement.getBoundingClientRect(), vb = rect.ownerSVGElement.viewBox.baseVal;
+  const xv = (e.clientX - bb.left) * vb.width / bb.width, n = R.ticks.length;
+  const i = Math.max(0, Math.min(n - 1, Math.round((xv - h.l) / (h.W - h.l - h.r) * (n - 1))));
+  tip.innerHTML = `<b>${esc(et(R.ticks[i]))} ET</b><div class="kv">` + h.series.map(s => `<span><i class="mark" style="background:${s.c}"></i>${esc(s.label)}</span><b>${s.v[i] == null ? "–" : h.opts.fmt(s.v[i])}</b>`).join("") + `</div>`;
+  tip.hidden = false;
+  tip.style.left = Math.min(e.clientX + 14, innerWidth - 340) + "px"; tip.style.top = (e.clientY + 12) + "px";
+});
+document.addEventListener("click", e => {
+  const rect = e.target.closest && e.target.closest("rect[data-ch]");
+  if (!rect) return;
+  const el = rect.closest("div"), h = el._h, bb = rect.ownerSVGElement.getBoundingClientRect(), vb = rect.ownerSVGElement.viewBox.baseVal;
+  ui.i = Math.max(0, Math.min(R.ticks.length - 1, Math.round(((e.clientX - bb.left) * vb.width / bb.width - h.l) / (h.W - h.l - h.r) * (R.ticks.length - 1))));
+  slider.value = ui.i; renderNow();
+});
+document.getElementById("asof").textContent = `Count through ${et(R.ticks[R.ticks.length - 1])} ET. Built ${et(R.built)} ET; the count isn't finished.`;
+renderAll();
+</script>
+</body>
+</html>

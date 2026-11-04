@@ -36,6 +36,7 @@ over half the district's vote, at 0%). The card lists the biggest counties still
     py night.py --minutes 340 [--state DIR] [--once]
 """
 import argparse
+import csv
 import gzip
 import hashlib
 import json
@@ -310,6 +311,41 @@ def v1_district(units, l24, race, model_sd):
                 left=round(res["remaining"]), n=res["n_counties"], units=len(keys))
 
 
+SIGNAL_FIELDS = ["ts_utc", "race", "event", "side", "flip", "against", "ask", "ours", "edge", "fee", "upto", "how", "pct", "margin",
+                 "count_read", "projected", "src"]
+
+
+def log_signals(path, rows, now, shown):
+    """signals.csv: every FLIP and board recommendation as the page showed it, one row each time one appears, ends, turns
+    into or out of a FLIP, or its ask moves 1c+ (user 2026-11-04: "we also had house flip predictions ... want those recorded
+    too"). shown: what's on the board, carried across passes in this file's last rows."""
+    new = not os.path.exists(path)
+    cur = {}
+    for r in rows:
+        b = r.get("best")
+        if b and b["edge"] >= BOARD_EDGE:
+            cur[r["id"]] = r
+    out = []
+    for rid, r in cur.items():
+        b = r["best"]
+        was = shown.get(rid)
+        if was and was["side"] == b["side"] and was["flip"] == b["flip"] and abs(was["ask"] - b["ask"]) < 0.01:
+            continue
+        shown[rid] = dict(side=b["side"], flip=b["flip"], ask=b["ask"])
+        out.append(dict(ts_utc=now, race=rid, event="flip" if b["flip"] else "board", side=b["side"], flip=int(b["flip"]), against=int(b["against"]), ask=b["ask"], ours=b["ours"],
+                        edge=b["edge"], fee=b["fee"], upto=b["upto"], how=b["how"], pct=r.get("pct"), margin=r.get("m"), count_read=r.get("c"), projected=r.get("mu"), src=r.get("src")))
+    for rid in [k for k in shown if k not in cur]:
+        was = shown.pop(rid)
+        out.append(dict(ts_utc=now, race=rid, event="ended", side=was["side"], flip=0, against=0, ask=was["ask"]))
+    if out:
+        with open(path, "a", newline="", encoding="utf-8") as f:
+            w = csv.DictWriter(f, fieldnames=SIGNAL_FIELDS)
+            if new:
+                w.writeheader()
+            w.writerows(out)
+    return len(out)
+
+
 def r_(x, n=2):
     return None if x is None else round(x, n)
 
@@ -354,6 +390,16 @@ def main():
     cache, errors = {}, {}
     end = time.time() + 60 * a.minutes
     snap_at, snap_sig = 0.0, None
+    # what's on the board, from signals.csv, so a new job carries on the log instead of re-logging everything
+    shown = {}
+    sig_path = os.path.join(out_dir, "signals.csv")
+    if os.path.exists(sig_path):
+        with open(sig_path, encoding="utf-8") as f:
+            for x in csv.DictReader(f):
+                if x["event"] == "ended":
+                    shown.pop(x["race"], None)
+                else:
+                    shown[x["race"]] = dict(side=x["side"], flip=x["flip"] == "1", ask=float(x["ask"]))
     while True:
         t0 = time.time()
         now = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
@@ -441,6 +487,7 @@ def main():
         try:
             write(os.path.join(out_dir, "live.json"), data)
             write(os.path.join(out_dir, "hist.json"), hist)
+            log_signals(sig_path, rows, now, shown)
             # the record of what the page showed: live.json is overwritten every pass, and hist.json keeps only the
             # Democrat's Kalshi ask; these keep both sides' prices, edges, FLIPs and counties still out
             body = json.dumps(rows, separators=(",", ":"), sort_keys=True).encode()

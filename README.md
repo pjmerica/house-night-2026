@@ -54,4 +54,6 @@ out). Every district's NYT file, by county, is recorded by polling-agg's cloud j
 
 `signals.csv` on the `live` branch (since 2026-11-04 2:50 pm ET): every FLIP and board recommendation as the page showed it, one row each time one appears, ends, turns into or out of a FLIP, or its ask moves 1c+. Before that, nothing logged the board.
 
+`kalshi_prices.csv` on the same branch (since 2026-11-04 2:55 pm ET): every House market's bid, ask, last price, volume and open interest each time its quote changes. Kalshi's minute and hourly history is in the `kalshi-*` assets of polling-agg's release `election-night-2026` (`Election night simulator/scripts/kalshi_backfill.py`, re-run when the count is done).
+
 `review.html` replays the whole House through the night from recordings (`build_review.py`: NYT's state pages from the release `election-night-2026`, Kalshi's minute candles from its `kalshi-minutes-*` asset, `hist.json`, `live.json`): expected seats, what the board said at each moment, and the profit if every recommendation was bought. Re-run when the count is done; the page says what is recorded and what is recomputed.

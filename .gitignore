@@ -1,4 +1,7 @@
 live.json
 hist.json
 snapshots/
+signals.csv
+kalshi_prices.csv
+kalshi_last.json
 __pycache__/

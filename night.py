@@ -175,7 +175,8 @@ def kalshi_quotes(tickers):
             for m in json.loads(r.read()).get("markets") or []:
                 def f(k):
                     return float(m[k]) if m.get(k) not in (None, "") else None
-                out[m["ticker"]] = dict(bid=f("yes_bid_dollars"), ask=f("yes_ask_dollars"), status=m.get("status"))
+                out[m["ticker"]] = dict(bid=f("yes_bid_dollars"), ask=f("yes_ask_dollars"), status=m.get("status"), last=f("last_price_dollars"),
+                                        volume=f("volume_fp"), oi=f("open_interest_fp"))
         time.sleep(0.12)
     return out
 
@@ -315,6 +316,29 @@ SIGNAL_FIELDS = ["ts_utc", "race", "event", "side", "flip", "against", "ask", "o
                  "count_read", "projected", "src"]
 
 
+PRICE_FIELDS = ["ts_utc", "ticker", "status", "bid", "ask", "last", "volume", "open_interest"]
+
+
+def log_prices(path, quotes, now, seen):
+    """kalshi_prices.csv: every House market's quote each time it changes (user 2026-11-04: "recording all of the kalshi
+    prices over time for each race"). seen: the last quote logged per ticker, kept in kalshi_last.json across jobs. Kalshi's
+    minute candles (kalshi_backfill.py) cover the same markets; this is the live record, at this job's cadence."""
+    out = []
+    for t, q in quotes.items():
+        k = [q.get("status"), q.get("bid"), q.get("ask"), q.get("last")]
+        if seen.get(t) != k:
+            seen[t] = k
+            out.append(dict(ts_utc=now, ticker=t, status=q.get("status"), bid=q.get("bid"), ask=q.get("ask"), last=q.get("last"), volume=q.get("volume"), open_interest=q.get("oi")))
+    if out:
+        new = not os.path.exists(path)
+        with open(path, "a", newline="", encoding="utf-8") as f:
+            w = csv.DictWriter(f, fieldnames=PRICE_FIELDS)
+            if new:
+                w.writeheader()
+            w.writerows(out)
+    return len(out)
+
+
 def log_signals(path, rows, now, shown):
     """signals.csv: every FLIP and board recommendation as the page showed it, one row each time one appears, ends, turns
     into or out of a FLIP, or its ask moves 1c+ (user 2026-11-04: "we also had house flip predictions ... want those recorded
@@ -391,6 +415,12 @@ def main():
     end = time.time() + 60 * a.minutes
     snap_at, snap_sig = 0.0, None
     # what's on the board, from signals.csv, so a new job carries on the log instead of re-logging everything
+    price_path, seen_path = os.path.join(out_dir, "kalshi_prices.csv"), os.path.join(out_dir, "kalshi_last.json")
+    try:
+        with open(seen_path, encoding="utf-8") as f:
+            seen_prices = json.load(f)
+    except (OSError, ValueError):
+        seen_prices = {}
     shown = {}
     sig_path = os.path.join(out_dir, "signals.csv")
     if os.path.exists(sig_path):
@@ -488,6 +518,8 @@ def main():
             write(os.path.join(out_dir, "live.json"), data)
             write(os.path.join(out_dir, "hist.json"), hist)
             log_signals(sig_path, rows, now, shown)
+            log_prices(price_path, quotes, now, seen_prices)
+            write(seen_path, seen_prices)
             # the record of what the page showed: live.json is overwritten every pass, and hist.json keeps only the
             # Democrat's Kalshi ask; these keep both sides' prices, edges, FLIPs and counties still out
             body = json.dumps(rows, separators=(",", ":"), sort_keys=True).encode()

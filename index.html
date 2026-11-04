@@ -15,6 +15,20 @@
 body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.42 var(--sans); font-variant-numeric: tabular-nums; }
 header { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 16px; border-bottom: 1px solid var(--line); }
 h1 { font-size: 18px; margin: 0 6px 0 0; }
+.liveb { font: 700 11px var(--mono); letter-spacing: .08em; color: #ff8a80; border: 1px solid #a33a33; background: #2a1414; border-radius: 4px; padding: 1px 7px; }
+.liveb.stale { color: #f0b35a; border-color: #8a6420; background: #2a2010; }
+.agec { font: 12px var(--mono); color: var(--muted); border: 1px solid var(--line2); border-radius: 999px; padding: 2px 10px; }
+.agec b { color: var(--text); font-weight: 600; }
+.row2 { flex-basis: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.row2 .sep { width: 1px; height: 22px; background: var(--line2); }
+.alert { display: grid; grid-template-columns: 120px 1fr; gap: 10px; align-items: start; background: var(--panel); border: 1px solid var(--line); border-left: 3px solid #8f7ae6; border-radius: 6px; padding: 8px 12px; margin-bottom: 8px; font-size: 13px; }
+.alert .lab { font: 700 11px var(--mono); letter-spacing: .08em; color: #b9a8f5; padding-top: 2px; }
+.alert.flipa { border-left-color: #f3c46b; } .alert.flipa .lab { color: #f3c46b; }
+.alert .items { max-height: 92px; overflow-y: auto; line-height: 1.6; }
+.alert a { color: var(--text); text-decoration: underline dotted; cursor: pointer; }
+#cboard { margin-bottom: 10px; }
+#cboard .board { max-height: 360px; overflow-y: auto; }
+#cboard .board thead th { position: sticky; top: -10px; background: var(--panel2); z-index: 1; }
 .chips { display: flex; gap: 6px; }
 button, select, input { background: var(--panel); color: var(--text); border: 1px solid var(--line2); border-radius: 6px; padding: 5px 10px; font: inherit; }
 button { cursor: pointer; }
@@ -71,7 +85,7 @@ tbody tr:hover td, tbody tr.sel td { background: #1a2230; }
 .clegend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 11.5px; color: var(--muted); }
 .clegend i { display: inline-block; width: 14px; height: 3px; border-radius: 2px; margin-right: 5px; vertical-align: 3px; }
 details summary { cursor: pointer; color: var(--muted); }
-.views { display: flex; gap: 6px; padding: 8px 16px 0; align-items: center; }
+.views { display: flex; gap: 6px; align-items: center; }
 #cardsview { padding: 8px 16px 14px; }
 #cardsview[hidden], main[hidden], .legend[hidden] { display: none; }
 .ctools { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-bottom: 8px; }
@@ -105,7 +119,15 @@ details summary { cursor: pointer; color: var(--muted); }
 </head>
 <body>
 <header>
-  <h1>Every race vs our model</h1>
+  <h1>Election Night · House desk</h1>
+  <span class="liveb" id="liveb">LIVE</span>
+  <span class="agec" id="agec">NYT –</span>
+  <span class="agec" id="agek">Kalshi –</span>
+  <div class="spacer"></div>
+  <div class="status" id="status">loading…</div>
+  <div class="row2">
+  <div class="chips" id="views"></div>
+  <span class="sep"></span>
   <div class="chips" id="offices"></div>
   <label class="note" for="metric">Color &amp; columns</label>
   <select id="metric">
@@ -122,12 +144,12 @@ details summary { cursor: pointer; color: var(--muted); }
   </select>
   <input id="q" type="search" placeholder="Find race or name" aria-label="Find a race">
   <label class="note"><input type="checkbox" id="board" checked style="width:auto;vertical-align:-2px"> Kalshi board</label>
-  <div class="spacer"></div>
-  <div class="status" id="status">loading…</div>
+  </div>
 </header>
 <div class="summary" id="summary"></div>
-<div class="views chips" id="views"><button data-view="map" aria-pressed="true">Map &amp; table</button><button data-view="cards" aria-pressed="false">Cards</button></div>
 <section id="cardsview" hidden>
+  <div id="alerts"></div>
+  <div id="cboard"></div>
   <div class="ctools">
     <label class="note" for="csort">Sort cards</label>
     <select id="csort">
@@ -162,7 +184,7 @@ const B = window.HOUSE_BENCH, G = window.HOUSE_GEO;
 const BY = Object.fromEntries(B.races.map(r => [r.id, r]));
 const C_D = [74, 144, 232], C_R = [232, 102, 95], FULL = { sh: 8, ou: 15, ke: 20 };
 const OFF = { H: "House", S: "Senate", G: "Governor" };
-const ui = { view: "map", csort: "edge", board: true, bsort: "edge", bdir: -1, office: "H", metric: "sh", filter: "all", q: "", sel: null, sort: "default", dir: 1, hover: null };
+const ui = { view: "cards", csort: "edge", board: true, bsort: "edge", bdir: -1, office: "H", metric: "sh", filter: "all", q: "", sel: null, sort: "default", dir: 1, hover: null };
 let LIVE = null, HIST = {}, DECK = null, FIT = null, lastErr = null, apiAt = 0, apiOff = 0, histAt = 0;
 
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -417,6 +439,17 @@ function raceCard(r) {
   return h + `</div>`;
 }
 
+function alerts(rs) {
+  const go = r => `<a data-go="${r.id}">${esc(short(r))}</a>`;
+  const lc = rs.filter(r => !r.L.call && r.L.mu != null && r.L.m != null && r.L.pct >= 20 && Math.abs(r.L.mu) >= 0.5 && Math.abs(r.L.m) >= 0.1 && (r.L.mu > 0) !== (r.L.m > 0))
+    .sort((a, b) => Math.abs(b.L.p - 0.5) - Math.abs(a.L.p - 0.5));
+  const fl = rs.filter(r => r.L.best && r.L.best.flip);
+  let h = "";
+  if (fl.length) h += `<div class="alert flipa"><span class="lab">FLIP</span><div class="items">${fl.map(r => `${go(r)}: buy ${esc(sideName(r, r.L.best.side))} at ${cents(r.L.best.ask)}, ours ${pc(r.L.best.ours)}, +${(100 * r.L.best.edge).toFixed(0)}¢ (${r.L.pct.toFixed(0)}% counted, ${lead(r.L.m, r)} so far)`).join(" · ")}</div></div>`;
+  if (lc.length) h += `<div class="alert"><span class="lab">LEAD CHANGE</span><div class="items">${lc.map(r => `${go(r)}: ${lead(r.L.m, r)} on screen, projected ${lead(r.L.mu, r)} (${pc(r.L.mu > 0 ? r.L.p : 1 - r.L.p)}) at ${r.L.pct.toFixed(0)}% counted`).join(" · ")}</div></div>`;
+  return h;
+}
+
 function renderCards(rs) {
   const vis = visible(rs), E = r => r.L.best ? r.L.best.edge : -9;
   const by = {
@@ -431,6 +464,10 @@ function renderCards(rs) {
   document.getElementById("cnote").textContent = `${list.length} ${OFF[ui.office]} races · ${nEdge} with a Kalshi edge 3¢+ · re-sorted every update · click a card for its map and charts` +
     (ui.office === "H" ? "" : " · Kalshi prices are on the House races (Senate and Governor prices: the data desk)");
   document.getElementById("cgrid").innerHTML = list.map(raceCard).join("");
+  document.getElementById("alerts").innerHTML = alerts(rs);
+  const cb = document.getElementById("cboard"), keep = cb.querySelector(".board") ? cb.querySelector(".board").scrollTop : 0;
+  cb.innerHTML = ui.board && ui.office === "H" ? board(rs) : "";
+  if (cb.querySelector(".board")) cb.querySelector(".board").scrollTop = keep;     // the update doesn't jump the list
 }
 
 function renderSide(rs) {
@@ -514,14 +551,19 @@ function render(refit) {
     ? `<span><i style="background:rgb(${C_R})"></i>Republican likely</span><span><i style="background:rgb(64,70,84)"></i>toss-up</span><span><i style="background:rgb(${C_D})"></i>Democrat / non-Republican likely</span><span><i style="background:rgb(34,41,52)"></i>not reporting</span><span>Faded: little counted · columns: chance minus 50%</span>`
     : `<span><i style="background:rgb(${C_R})"></i>Republican ahead of our model (${full}+ pts)</span><span><i style="background:rgb(64,70,84)"></i>as expected</span><span><i style="background:rgb(${C_D})"></i>Democrat / non-Republican ahead (${full}+ pts)</span><span><i style="background:rgb(34,41,52)"></i>not reporting</span><span>Faded: little counted · drag to rotate, scroll to zoom, click for detail</span>`;
   renderSummary(all);
-  document.getElementById("views").innerHTML = [["map", "Map &amp; table"], ["cards", "Cards"]].map(([k, v]) => `<button data-view="${k}" aria-pressed="${ui.view === k}">${v}</button>`).join("");
+  document.getElementById("views").innerHTML = [["cards", "Cards"], ["map", "Map &amp; table"]].map(([k, v]) => `<button data-view="${k}" aria-pressed="${ui.view === k}">${v}</button>`).join("");
   document.querySelector("main").hidden = ui.view !== "map";
   document.getElementById("legend").hidden = ui.view !== "map";
   document.getElementById("cardsview").hidden = ui.view !== "cards";
   const age = LIVE ? Math.round((Date.now() - genOf(LIVE)) / 1000) : null;
   document.getElementById("status").innerHTML = lastErr && !LIVE ? `<span class="err">${esc(lastErr)}</span>` : LIVE ?
     `data <b>${etTime(new Date(genOf(LIVE)))}</b> <span class="${age > 180 ? "err" : ""}">(${age > 180 ? "stale, " + Math.round(age / 60) + " min" : age + " s ago"})</span> · ${LIVE.states_ok}/${LIVE.states} states` : "loading…";
-  if (ui.view === "cards") { renderCards(rs); if (DECK) return; }
+  const ages = LIVE ? Math.round((Date.now() - genOf(LIVE)) / 60000) : null;
+  document.getElementById("agec").innerHTML = `NYT <b>${ages == null ? "–" : ages < 1 ? "<1m" : ages + "m"}</b>`;
+  document.getElementById("agek").innerHTML = `Kalshi <b>${ages == null || !(LIVE.races || []).some(x => x.k) ? "–" : ages < 1 ? "<1m" : ages + "m"}</b>`;
+  document.getElementById("liveb").className = "liveb" + (ages != null && ages >= 3 ? " stale" : "");
+  document.getElementById("liveb").textContent = ages != null && ages >= 3 ? "STALE" : "LIVE";
+  if (ui.view === "cards") { renderCards(rs); return; }     // the map is built when its tab first opens
   renderSide(rs);
   if (!FIT || refit) FIT = viewFor(ALL_RINGS, ui.office === "H" ? 35 : 40);
   if (!DECK) {
@@ -540,12 +582,21 @@ function select(id, zoom) {
 
 document.getElementById("views").addEventListener("click", e => {
   const b = e.target.closest("button[data-view]");
-  if (b) { ui.view = b.dataset.view; render(false); if (ui.view === "map" && DECK) { DECK.redraw(true); } }
+  if (b) { ui.view = b.dataset.view; render(!DECK); if (ui.view === "map" && DECK) { DECK.redraw(true); } }
 });
 document.getElementById("csort").addEventListener("change", e => { ui.csort = e.target.value; render(false); });
 document.getElementById("cgrid").addEventListener("click", e => {
   const c = e.target.closest(".rc[data-id]");
-  if (c) { ui.view = "map"; select(c.dataset.id, true); window.scrollTo(0, 0); }
+  if (c) { openRace(c.dataset.id); }
+});
+function openRace(id) { const first = !DECK; ui.view = "map"; if (first) render(true); select(id, true); window.scrollTo(0, 0); }
+document.getElementById("cardsview").addEventListener("click", e => {
+  const bt = e.target.closest("th[data-bsort]");
+  if (bt) { const k = bt.dataset.bsort; if (ui.bsort === k && k !== "flip") ui.bdir = -ui.bdir; else { ui.bsort = k; ui.bdir = k === "ask" || k === "pct" ? 1 : -1; } render(false); return; }
+  const a = e.target.closest("[data-go]");
+  if (a) { openRace(a.dataset.go); return; }
+  const tr = e.target.closest("#cboard tr[data-id]");
+  if (tr) openRace(tr.dataset.id);
 });
 document.getElementById("offices").addEventListener("click", e => { const b = e.target.closest("button[data-office]"); if (b) { ui.office = b.dataset.office; ui.sel = null; render(false); flyTo(FIT); } });
 document.getElementById("metric").addEventListener("change", e => { ui.metric = e.target.value; render(false); });

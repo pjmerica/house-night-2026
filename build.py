@@ -84,6 +84,35 @@ def lean_tables():
     return out
 
 
+def unit_key(u):
+    """A reporting unit's key: state + county FIPS, plus the town code where NYT reports by town (New England), so
+    2024's units and tonight's district files line up."""
+    k = (u.get("fips_state") or "") + (u.get("fips_county") or "")
+    if u.get("level") == "township" and u.get("fips_suffix"):
+        k += "-" + str(u["fips_suffix"])
+    return k
+
+
+def leans_2024():
+    """{unit key: [logit of Harris's two-party share in 2024, votes]} for every county (towns in New England), from the
+    2024 presidential file of each state in polling-agg's NYT archive. The county projector's lean for each unit."""
+    nyt = os.path.join(PA, "State election results", "data", "raw", "nyt_all", "2024")
+    out = {}
+    for f in sorted(os.listdir(nyt)):
+        if not f.endswith("-president.json"):
+            continue
+        r = json.load(open(os.path.join(nyt, f), encoding="utf-8"))["races"][0]
+        for u in r["reporting_units"]:
+            if u.get("level") not in ("county", "township"):
+                continue
+            v = {c["nyt_id"]: (c.get("votes") or {}).get("total") or 0 for c in u["candidates"]}
+            d, rr = v.get("harris-k", 0), v.get("trump-d", 0)
+            if d + rr >= 20:
+                p = min(max(d / (d + rr), 0.005), 0.995)
+                out[unit_key(u)] = [round(math.log(p / (1 - p)), 4), d + rr]
+    return out
+
+
 def geo():
     g = js_obj(os.path.join(PA, "docs", "us_house_2026_geo.js"))
     u = g["unit"]
@@ -123,7 +152,9 @@ def main():
     rs = races()
     from collections import Counter
     print(Counter((r["office"], r["kind"]) for r in rs))
-    bench = dict(races=rs, lean=lean_tables(), model_sd=lp.MODEL_MARGIN_SD, sd_floor=lp.SD_FLOOR)
+    l24 = leans_2024()
+    print(len(l24), "county / town leans from 2024")
+    bench = dict(races=rs, lean=lean_tables(), model_sd=lp.MODEL_MARGIN_SD, sd_floor=lp.SD_FLOOR, l24=l24)
     with open(os.path.join(HERE, "house_bench.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(bench, f, separators=(",", ":"))
     with open(os.path.join(HERE, "house_bench.js"), "w", encoding="utf-8", newline="\n") as f:

@@ -31,3 +31,14 @@ Kalshi's taker fee, pay up to = the highest ask still 3c+ after the fee, and FLI
 edge 5c+, ask 8-40c, 20%+ counted) with the count read pointing the same way as the pick. Picks against the count are
 tagged: that edge is our pre-election model arguing with a market that sees the votes. The House projection sees only
 district totals (not which counties are out), so check NYT's district map and the live book before buying.
+
+## County by county (House)
+
+NYT's state pages carry only each district's total; each district also has its own file
+(`results-{state}-us-house-{n}.json`) with every county (towns in New England) and its expected vote. For every
+counting, uncalled House race `night.py` reads that file and runs polling-agg's projector v1 (`county_project.py`,
+copied unchanged): each county's lean is its 2024 presidential two-party share (`house_bench.json` `l24`, from
+`build.py`; a county split between districts uses the whole county's), re-centred so the district is tied, weighted by
+NYT's expected vote, started from our model (sd 6.1). Where the units don't line up (Connecticut's towns tonight,
+Alaska) the race keeps v0 on the district total, tagged on the page. Cards and the detail panel list the biggest
+counties still out (share counted, votes left, 2024 lean, what the rest is expected to give).

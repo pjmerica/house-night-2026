@@ -24,6 +24,15 @@ Per race (the desk's projector v0, live_project.project, with our margin model a
   shift            projection - our model's margin: the same, weighed by how sure the count read is
 Margins are D (non-Republican) minus R, points of all votes. p is NYT's expected-vote share counted (eevp).
 
+County by county (House, 2026-11-03 night; user: "do we not have county level info?"): NYT's state pages carry only
+district totals, but each district has its own file (results-{state}-us-house-{n}.json) with every county (towns in
+New England) and its expected vote. For each counting, uncalled House race that file is read and the desk's projector
+v1 (county_project.project) runs on it: each county's lean = its 2024 presidential two-party share (house_bench.json
+"l24"; a county split between districts uses the whole county's), re-centred so the district is tied, weighted by
+NYT's expected vote; started from our model (sd 6.1). It replaces v0 where the counties line up (src "v1"); the count
+read is then v1's count-only margin, which knows which counties are still out (OH-09: Merrin +18 with Lucas County,
+over half the district's vote, at 0%). The card lists the biggest counties still out.
+
     py night.py --minutes 340 [--state DIR] [--once]
 """
 import argparse
@@ -34,6 +43,8 @@ import subprocess
 import time
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
+
+import county_project      # polling-agg's projector v1 (Election night simulator/scripts), copied unchanged
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 NYT = "https://static01.nyt.com/elections-assets/pages/data/2026-11-03/results-{}.json"
@@ -203,6 +214,98 @@ def kalshi_sides(events, q):
     return out
 
 
+DIST = "https://static01.nyt.com/elections-assets/pages/data/2026-11-03/results-{}-us-house-{}.json"
+
+
+def unit_key(u):
+    k = (u.get("fips_state") or "") + (u.get("fips_county") or "")
+    if u.get("level") == "township" and u.get("fips_suffix"):
+        k += "-" + str(u["fips_suffix"])
+    return k
+
+
+def fetch_district(job):
+    race, = job
+    st, n = race["k"].split("-")
+    try:
+        url = DIST.format(SLUG[st], int(n)) + f"?t={int(time.time())}"
+        with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=40) as r:
+            return race["id"], json.loads(r.read())
+    except Exception:
+        return race["id"], None
+
+
+def district_units(d, race):
+    """-> {unit key: dict(d, r, total, expected, eevp, name)} from a district file (towns in New England, counties
+    elsewhere), the two sides matched as tally() does."""
+    r = (d.get("races") or [None])[0]
+    if not r:
+        return {}
+    meta = r.get("candidate_metadata") or {}
+
+    def side(cid):
+        m = meta.get(cid) or {}
+        ln = (m.get("last_name") or "").lower()
+        if race.get("dl") and ln and (ln in race["dl"].lower() or race["dl"].lower() in ln):
+            return "D"
+        if race.get("rl") and ln and (ln in race["rl"].lower() or race["rl"].lower() in ln):
+            return "R"
+        p = (m.get("party") or {}).get("nyt_id")
+        return "D" if p == "DEM" and race.get("dp") == "DEM" else "R" if p == "GOP" else None
+    out = {}
+    for u in r.get("reporting_units") or []:
+        if u.get("level") not in ("county", "township"):
+            continue
+        dv = rv = tot = 0
+        for c in u.get("candidates") or []:
+            v = (c.get("votes") or {}).get("total") or 0
+            tot += v
+            s = side(c["nyt_id"])
+            dv += v if s == "D" else 0
+            rv += v if s == "R" else 0
+        out[unit_key(u)] = dict(d=dv, r=rv, total=tot, expected=u.get("total_expected_vote") or 0,
+                                eevp=u.get("eevp") or 0, name=u.get("name"))
+    return out
+
+
+def v1_district(units, l24, race, model_sd):
+    """The desk's v1 on one district. -> dict(mu, sd, p, c, csd, out) or None when the units don't line up."""
+    if not units:
+        return None
+    keys = [k for k in units if k in l24]
+    if len(keys) < 0.9 * len(units):
+        return None
+    exp = {k: max(units[k]["expected"], units[k]["total"]) for k in keys}
+    tot = sum(exp.values())
+    if tot <= 0:
+        return None
+    w = {k: exp[k] / tot for k in keys}
+    raw = {k: l24[k][0] for k in keys}
+    s_tie = county_project.solve_shift(raw, w, 0.5)
+    L = {k: raw[k] + s_tie for k in keys}
+    res = county_project.project({k: units[k] for k in keys}, L, w, m0=(race["m"], model_sd))
+    if not res or not res["n_counties"]:
+        return None
+    ts = res["two_share"]
+    c = county_project.shift_margin(L, w, res["count_shift"], ts)
+    csd = (county_project.shift_margin(L, w, res["count_shift"] + res["count_shift_se"], ts)
+           - county_project.shift_margin(L, w, res["count_shift"] - res["count_shift_se"], ts)) / 2
+    out = []
+    for k in sorted(keys, key=lambda k: -(exp[k] - units[k]["total"])):
+        left = exp[k] - units[k]["total"]
+        if left < 0.03 * tot or len(out) >= 4:
+            break
+        u = units[k]
+        two = u["d"] + u["r"]
+        share = u["d"] / two if two >= 50 else float(county_project.expit(L[k] + res["shift"]))
+        out.append(dict(n=u["name"], pct=round(u["eevp"] or (100 * u["total"] / exp[k] if exp[k] else 0)),
+                        left=round(left), sh=round(100 * left / tot, 1),
+                        m24=round(100 * (2 * float(county_project.expit(raw[k])) - 1), 1),
+                        exp=round(100 * (2 * share - 1), 1)))
+    return dict(mu=res["mu"], sd=res["sd"], p=res["p_win"], c=c, csd=abs(csd), out=out,
+                left=round(res["remaining"]), n=res["n_counties"], units=len(keys))
+
+
 def r_(x, n=2):
     return None if x is None else round(x, n)
 
@@ -262,11 +365,35 @@ def main():
         except Exception as e:  # noqa: BLE001
             errors["kalshi"] = f"{now} {str(e)[:120]}"
             quotes = {}
+        # county by county: each counting, uncalled House race's own NYT file
+        want = []
+        for race in races:
+            if race["office"] != "H" or race["kind"] != "ok" or race["m"] is None:
+                continue
+            nr = cache.get(race["st"], {}).get((race["office"], race["k"]))
+            t = tally(nr, race) if nr else None
+            if t and t["tot"] >= 100 and 0 < t["pct"] < 99.5 and not t["call"]:
+                want.append((race,))
+        dist = {}
+        with ThreadPoolExecutor(16) as ex:
+            for rid, d in ex.map(fetch_district, want):
+                if d is not None:
+                    dist[rid] = d
         rows = []
+        n_v1 = 0
         for race in races:
             nr = cache.get(race["st"], {}).get((race["office"], race["k"]))
             t = tally(nr, race) if nr else None
             pr = project(race, t, bench["lean"][race["st"]], bench["model_sd"], bench["sd_floor"])
+            v1 = None
+            if pr and race["id"] in dist:
+                try:
+                    v1 = v1_district(district_units(dist[race["id"]], race), bench["l24"], race, bench["model_sd"])
+                except Exception as e:  # noqa: BLE001
+                    errors["v1 " + race["k"]] = f"{now} {type(e).__name__}: {e}"[:160]
+            if v1:
+                n_v1 += 1
+                pr = dict(mu=v1["mu"], sd=v1["sd"], p=v1["p"], c=v1["c"], csd=v1["csd"])
             margin = 100 * (t["d"] - t["r"]) / t["tot"] if t and t["tot"] else None
             counting = bool(t and t["tot"] >= 100 and t["pct"] > 0)
             row = dict(id=race["id"], pct=r_(t["pct"], 1) if t else None, v=t["tot"] if t else 0,
@@ -276,7 +403,9 @@ def main():
                 row.update(mu=r_(pr["mu"]), sd=r_(pr["sd"]), p=r_(pr["p"], 4),
                            c=r_(pr["c"]) if counting else None, csd=r_(pr["csd"]) if counting else None,
                            ou=r_(pr["c"] - race["m"]) if counting else None,
-                           sh=r_(pr["mu"] - race["m"]) if counting else None)
+                           sh=r_(pr["mu"] - race["m"]) if counting else None, src="v1" if v1 else "v0")
+                if v1:
+                    row.update(out=v1["out"], left=v1["left"], nu=v1["units"], nc=v1["n"])
             ks = kalshi_sides(kmap.get(race["k"], []), quotes) if race["office"] == "H" and pr and not row["call"] else {}
             if ks:
                 row["k"] = {s: dict(bid=v["bid"], ask=v["ask"], how=v["how"]) for s, v in ks.items()}
@@ -313,7 +442,8 @@ def main():
             print("publish:", e, flush=True)
         n = sum(1 for x in rows if x.get("c") is not None)
         nb = sum(1 for x in rows if (x.get("best") or {}).get("edge", -1) >= BOARD_EDGE)
-        print(now, f"{len(cache)} states, {n} races counting, {len(quotes)} Kalshi quotes, {nb} on the board, "
+        print(now, f"{len(cache)} states, {n} races counting, {len(dist)}/{len(want)} district files, {n_v1} county by county, "
+              f"{len(quotes)} Kalshi quotes, {nb} on the board, "
               f"{len(errors)} errors, {time.time() - t0:.1f}s", flush=True)
         if a.once or time.time() > end:
             break

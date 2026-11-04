@@ -112,6 +112,9 @@ details summary { cursor: pointer; color: var(--muted); }
 .rc .buyl { border-left: 3px solid #2c8a52; padding-left: 7px; }
 .rc .buyl.flipl { border-color: #f3c46b; }
 .rc .tag { font-size: 11px; color: #f0b35a; }
+.outl { font-size: 11.5px; color: var(--muted); display: grid; gap: 1px; }
+.outl b { color: var(--text); font-weight: 600; }
+.outl .h { color: var(--faint); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; }
 .rc .ovr { background: #10151d; border-left: 3px solid var(--line2); padding: 4px 8px; font-size: 12px; color: var(--muted); border-radius: 0 4px 4px 0; }
 .rc svg text { fill: var(--faint); font: 10px var(--sans); }
 @media (max-width: 1100px) { main { grid-template-columns: 1fr; } aside { max-height: none; } }
@@ -241,7 +244,8 @@ function whyTags(r) {
   if (!r.L.pct) out.push(["warn", "not counting yet: our model vs the market"]);
   else if (r.L.c != null && Math.abs(r.L.c) < 1 && !b.against) out.push(["warn", "count too close to read: this edge is mostly our pre-election model"]);
   else if (!b.flip && !b.against && b.ask < 0.4 && b.ours < 0.45) out.push(["warn", "not a FLIP: longshots like this lost in 2024"]);
-  if (b.ask < 0.08 && r.L.pct >= 20) out.push(["warn", "market near-certain: it may see which counties are still out"]);
+  if (b.ask < 0.08 && r.L.pct >= 20) out.push(["warn", r.L.src === "v1" ? "market near-certain: check the live count" : "market near-certain: it may see which counties are still out"]);
+  if (r.L.pct && r.L.src !== "v1") out.push(["warn", "district total only: no county detail for this race"]);
   return out;
 }
 
@@ -293,7 +297,7 @@ function card(r, full) {
   h += `<span>Margin so far</span><b class="${cls(L.m)}">${lead(L.m, r)}</b><i class="gap"></i>`;
   h += `<span>Our model (before the count)</span><b class="${cls(r.m)}">${lead(r.m, r)}${r.win != null ? " · " + pc(r.win) : ""}</b>`;
   if (r.basis === "fundamentals") h += `<span></span><b style="font-family:var(--sans);color:var(--faint)">no polls: fundamentals model</b>`;
-  if (L.c != null) h += `<span>Count read (late shift applied)</span><b class="${cls(L.c)}">${lead(L.c, r)} ± ${L.csd.toFixed(1)}</b>`;
+  if (L.c != null) h += `<span>Count read (${L.src === "v1" ? "county by county" : "late shift applied"})</span><b class="${cls(L.c)}">${lead(L.c, r)} ± ${L.csd.toFixed(1)}</b>`;
   if (L.ou != null) h += `<span>Over/under vs model</span><b class="${cls(L.ou)}">${sgn(L.ou)} pts</b>`;
   if (L.mu != null) {
     h += `<i class="gap"></i><span>Projected final</span><b class="${cls(L.mu)}">${lead(L.mu, r)}</b>`;
@@ -307,6 +311,7 @@ function card(r, full) {
     if (L.best) h += `<span>Best buy</span><b class="${L.best.edge > 0 ? "pos" : ""}">${esc(sideName(r, L.best.side))} at ${cents(L.best.ask)}: ${L.best.edge >= 0 ? "+" : "−"}${(100 * Math.abs(L.best.edge)).toFixed(1)}¢${L.best.upto ? " · pay up to " + cents(L.best.upto) : ""}</b>`;
   }
   h += `</div>`;
+  if (full) h += outList(r, 4);
   if (L.best && full) {
     h += `<div class="kfoot">${esc(L.best.how)} · fee ${cents(L.best.fee)}${whyTags(r).map(([c, t]) => `<br><span class="${c === "warn" ? "err" : ""}">${esc(t)}</span>`).join("")}</div>`;
   }
@@ -322,7 +327,8 @@ function card(r, full) {
       h += `<div class="note">Margin, points (+ = ${esc(r.dl)} ahead)</div>` + chart(pts, [{ k: "mu", color: "#4a90e8", label: "Projected final" }, { k: "m", color: "#c9d1dc", label: "Margin so far" }], [lo, hi], v => (v > 0 ? "+" : "") + v, 0, r.m);
     }
     const own = (B.lean[r.st] || []).some(x => x[0] !== 0);
-    h += `<div class="fine">Count read: the margin so far plus the votes still out moving ${own ? `the way ${esc(r.st)}'s late votes moved in 2020–24 statewide races` : `with no lean (we have no ${esc(r.st)} count history; the spread is all states')`}, as the desk's v0. Projection: that read and our model (± ${B.model_sd} pts) combined by how sure each is. A district's count can run differently from its state's.</div>`;
+    if (L.src === "v1") h += `<div class="fine">County by county (the desk's projector v1): each county's counted votes against its 2024 presidential lean give the district's swing; the votes still out in each county are projected at its lean plus that swing (and part of its own deviation once it has counted), started from our model (± ${B.model_sd} pts). From NYT's district file, with each county's expected vote. A county split between districts uses the whole county's 2024 lean.</div>`;
+    else h += `<div class="fine">Count read: the margin so far plus the votes still out moving ${own ? `the way ${esc(r.st)}'s late votes moved in 2020–24 statewide races` : `with no lean (we have no ${esc(r.st)} count history; the spread is all states')`}, as the desk's v0. Projection: that read and our model (± ${B.model_sd} pts) combined by how sure each is. A district's count can run differently from its state's.</div>`;
   }
   return h;
 }
@@ -378,7 +384,7 @@ function board(rs) {
       tags.filter(t => !b.flip || t[0] === "warn").map(([c, t]) => `<div class="why ${c}">${esc(t)}</div>`).join("") + `</td>` +
       `<td>${r.L.pct ? r.L.pct.toFixed(0) + "%" : "–"}</td><td>${cents(b.ask)}</td><td>${pc(b.ours)}</td><td class="pos">+${(100 * b.edge).toFixed(0)}¢</td><td>${b.upto ? cents(b.upto) : "–"}</td></tr>`;
   }
-  h += `</tbody></table><p class="kfoot" style="margin:0">Click a heading to sort (again to reverse); "Buy on Kalshi" puts FLIPs first, then picks with the count, then the rest, by edge. Edge = our chance − ask − Kalshi's taker fee, per $1 contract; pay up to = the highest ask still 3¢+ after the fee. Our House projection sees only each district's total (not which counties are out) and leans on the pre-election model longer than the desk's, so check NYT's district map and the live book before buying: prices move in seconds after a vote dump. Kalshi prices: every 60 s.</p></div>`;
+  h += `</tbody></table><p class="kfoot" style="margin:0">Click a heading to sort (again to reverse); "Buy on Kalshi" puts FLIPs first, then picks with the count, then the rest, by edge. Edge = our chance − ask − Kalshi's taker fee, per $1 contract; pay up to = the highest ask still 3¢+ after the fee. Counting House races run county by county from NYT's district files (the desk's v1); where a district's counties don't line up it falls back to the district total (tagged). Check the live book before buying: prices move in seconds after a vote dump. Kalshi prices: every 60 s.</p></div>`;
   return h;
 }
 
@@ -401,6 +407,15 @@ function bar(r) {
   return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Projected margin with its 80% band (purple), the margin so far (white triangle) and our model (dashed)">${g}</svg>`;
 }
 
+function outList(r, n) {
+  const o = r.L.out || [];
+  if (!o.length) return r.L.src === "v1" && r.L.pct < 99.5 ? `<div class="outl"><span class="h">Still out</span><span>no county with 3%+ of the district's vote left</span></div>` : "";
+  return `<div class="outl"><span class="h">Biggest counties still out</span>` + o.slice(0, n).map(c =>
+    `<span><b>${esc(c.n)}</b> ${c.pct}% counted · ~${fmtInt(c.left)} left (${c.sh}% of the district) · 2024 ${c.m24 >= 0 ? "D" : "R"}+${Math.abs(c.m24).toFixed(0)} · ` +
+    `rest expected <span class="${c.exp >= 0 ? "pos" : "neg"}">${c.exp >= 0 ? esc(r.dl) : esc(r.rl)} +${Math.abs(c.exp).toFixed(0)}</span></span>`).join("") + `</div>`;
+}
+const srcLabel = r => r.L.src === "v1" ? `county by county (${r.L.nu} ${r.st === "ME" || r.st === "CT" || r.st === "MA" || r.st === "NH" || r.st === "VT" || r.st === "RI" ? "towns" : "counties"})` : r.L.src === "v0" ? "district total only" : "from our model";
+
 function raceCard(r) {
   const L = r.L, b = L.best;
   const chip = L.call ? `<span class="chip ${L.call === "D" ? "callD" : L.call === "R" ? "callR" : "done"}">CALLED · ${esc(L.call === "D" ? r.dl : L.call === "R" ? r.rl : L.call)}</span>`
@@ -418,11 +433,12 @@ function raceCard(r) {
   const fav = L.p == null ? null : L.p >= 0.5 ? "D" : "R", fp = L.p == null ? null : Math.max(L.p, 1 - L.p);
   h += `<div class="big2"><div><small>Projected final</small><b class="${cls(L.mu ?? r.m)}">${lead(L.mu ?? r.m, r)}</b></div>` +
     `<div class="r"><small>Win chance</small><b class="${fav === "D" ? "pos" : "neg"}">${fav ? esc(sideName(r, fav)) + " " + (fp > 0.995 ? ">99%" : (100 * fp).toFixed(0) + "%") : "–"}</b></div></div>`;
-  h += `<div class="sub2"><span>${L.mu != null ? "80%: " + lead(lo, r) + " to " + lead(hi, r) : ""}</span><span>from our model</span></div>`;
+  h += `<div class="sub2"><span>${L.mu != null ? "80%: " + lead(lo, r) + " to " + lead(hi, r) : ""}</span><span>${L.c != null ? srcLabel(r) : "from our model"}</span></div>`;
   const left = L.pct > 0 && L.pct < 100 ? L.v * (100 / L.pct) - L.v : 0;
   h += `<div class="kv2"><span>On screen</span><b class="${cls(L.m)}">${lead(L.m, r)}</b><span>Votes counted</span><b>${fmtInt(L.v)}</b>` +
     `<span>Our model</span><b class="${cls(r.m)}">${lead(r.m, r)}</b><span>Votes left (est.)</span><b>${L.pct ? fmtInt(left) : "–"}</b>` +
     `<span>Count read</span><b class="${cls(L.c)}">${L.c != null ? lead(L.c, r) : "–"}</b><span>Model win</span><b>${r.win != null ? esc(r.dl) + " " + pc(r.win) : "–"}</b></div>`;
+  h += outList(r, 2);
   if (L.k) {
     h += `<div class="kbox">`;
     for (const sd of ["D", "R"]) if (L.k[sd]) h += `<div class="row"><span class="${sd === "D" ? "pos" : "neg"}">Kalshi ${esc(sideName(r, sd))}</span><b>${cents(L.k[sd].bid)} / ${cents(L.k[sd].ask)}</b><span class="note">ours ${pc(sd === "D" ? L.p : 1 - L.p)}</span></div>`;

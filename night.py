@@ -7,7 +7,7 @@ many kalshi markets as you can ... highlighting what to buy"):
   edge             our chance - ask - Kalshi's taker fee (0.07 x multiplier x P(1-P)), per $1 contract
   pay up to        the highest ask that still leaves a 3c edge after the fee
   FLIP             the desk's rule (live_project.is_flip): our chance 45%+, edge 5c+, ask 8-40c, 20%+ counted,
-                   and (House only) the count read pointing the same way as the pick. A district's projection leans on
+                   and (House only) the count read leading the pick's side by 1+ pt. A district's projection leans on
                    our pre-election model for longer than the desk's county-by-county one (no county detail, and most
                    states have no count history), so a pick against the count is the model arguing with a market that
                    sees the count: tagged "against", never a FLIP (first pass, 2026-11-03: NJ-02 D+4.6 at 70% counted,
@@ -292,7 +292,7 @@ def main():
                 best["against"] = bool(c is not None and abs(c) >= 0.5 and (c > 0) != (best["side"] == "D"))
                 best["flip"] = bool(best["ours"] >= FLIP_MIN_P and best["edge"] >= FLIP_MIN_EDGE
                                     and FLIP_MIN_ASK <= best["ask"] <= FLIP_MAX_ASK and (t["pct"] if t else 0) >= FLIP_MIN_PCT
-                                    and not best["against"])
+                                    and c is not None and (c if best["side"] == "D" else -c) >= 1.0)
                 row["best"] = best
             rows.append(row)
             if counting:

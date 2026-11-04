@@ -69,6 +69,35 @@ tbody tr:hover td, tbody tr.sel td { background: #1a2230; }
 .clegend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 11.5px; color: var(--muted); }
 .clegend i { display: inline-block; width: 14px; height: 3px; border-radius: 2px; margin-right: 5px; vertical-align: 3px; }
 details summary { cursor: pointer; color: var(--muted); }
+.views { display: flex; gap: 6px; padding: 8px 16px 0; align-items: center; }
+#cardsview { padding: 8px 16px 14px; }
+#cardsview[hidden], main[hidden], .legend[hidden] { display: none; }
+.ctools { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-bottom: 8px; }
+.cgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 10px; }
+.rc { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 11px 12px; display: grid; gap: 6px; cursor: pointer; align-content: start; }
+.rc:hover { border-color: var(--line2); }
+.rc.flipc { border-color: #a8741f; box-shadow: 0 0 0 1px #a8741f inset; }
+.rc.edgec { border-color: #2c5a3c; }
+.rc .top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.rc .top b { font-size: 15px; }
+.chip { font: 600 10.5px var(--mono); letter-spacing: .06em; padding: 1px 6px; border-radius: 4px; border: 1px solid var(--line2); color: var(--muted); white-space: nowrap; }
+.chip.live { color: #e7ebf1; } .chip.done { color: #6fd39a; border-color: #2c5a3c; } .chip.callD { color: var(--dem); border-color: var(--dem); } .chip.callR { color: var(--rep); border-color: var(--rep); }
+.rc .names { display: flex; justify-content: space-between; font-size: 13px; }
+.rc .big2 { display: flex; justify-content: space-between; align-items: end; }
+.rc .big2 small { display: block; color: var(--muted); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; }
+.rc .big2 b { font: 600 21px var(--mono); }
+.rc .big2 .r { text-align: right; }
+.rc .sub2 { display: flex; justify-content: space-between; color: var(--faint); font-size: 11.5px; margin-top: -4px; }
+.rc .kv2 { display: grid; grid-template-columns: auto 1fr auto 1fr; gap: 2px 10px; font-size: 12px; }
+.rc .kv2 span { color: var(--muted); } .rc .kv2 b { font: 500 12px var(--mono); text-align: right; }
+.rc .kbox { background: #10151d; border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; font-size: 12px; display: grid; gap: 3px; }
+.rc .kbox .row { display: flex; justify-content: space-between; gap: 8px; }
+.rc .kbox .row b { font-family: var(--mono); font-weight: 500; }
+.rc .buyl { border-left: 3px solid #2c8a52; padding-left: 7px; }
+.rc .buyl.flipl { border-color: #f3c46b; }
+.rc .tag { font-size: 11px; color: #f0b35a; }
+.rc .ovr { background: #10151d; border-left: 3px solid var(--line2); padding: 4px 8px; font-size: 12px; color: var(--muted); border-radius: 0 4px 4px 0; }
+.rc svg text { fill: var(--faint); font: 10px var(--sans); }
 @media (max-width: 1100px) { main { grid-template-columns: 1fr; } aside { max-height: none; } }
 </style>
 </head>
@@ -95,6 +124,21 @@ details summary { cursor: pointer; color: var(--muted); }
   <div class="status" id="status">loading…</div>
 </header>
 <div class="summary" id="summary"></div>
+<div class="views chips" id="views"><button data-view="map" aria-pressed="true">Map &amp; table</button><button data-view="cards" aria-pressed="false">Cards</button></div>
+<section id="cardsview" hidden>
+  <div class="ctools">
+    <label class="note" for="csort">Sort cards</label>
+    <select id="csort">
+      <option value="edge">Kalshi edge (biggest first)</option>
+      <option value="flip">FLIPs first, then edge</option>
+      <option value="close">Closest projection</option>
+      <option value="pct">Most counted</option>
+      <option value="sh">Biggest shift vs model</option>
+    </select>
+    <span class="note" id="cnote"></span>
+  </div>
+  <div class="cgrid" id="cgrid"></div>
+</section>
 <main>
   <div id="deckmap" aria-label="3D map: every race against our model"></div>
   <aside id="side"></aside>
@@ -116,7 +160,7 @@ const B = window.HOUSE_BENCH, G = window.HOUSE_GEO;
 const BY = Object.fromEntries(B.races.map(r => [r.id, r]));
 const C_D = [74, 144, 232], C_R = [232, 102, 95], FULL = { sh: 8, ou: 15, ke: 20 };
 const OFF = { H: "House", S: "Senate", G: "Governor" };
-const ui = { board: true, office: "H", metric: "sh", filter: "all", q: "", sel: null, sort: "default", dir: 1, hover: null };
+const ui = { view: "map", csort: "edge", board: true, bsort: "edge", bdir: -1, office: "H", metric: "sh", filter: "all", q: "", sel: null, sort: "default", dir: 1, hover: null };
 let LIVE = null, HIST = {}, DECK = null, FIT = null, lastErr = null, apiAt = 0, apiOff = 0, histAt = 0;
 
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -168,9 +212,10 @@ const sideName = (r, s) => s === "D" ? r.dl : r.rl;
 function whyTags(r) {
   const b = r.L.best, out = [];
   if (!b) return out;
-  if (b.flip) out.push(["", "FLIP (the desk's rule): the count points this way, our chance 45%+, ask 8–40¢"]);
+  if (b.flip) out.push(["", "FLIP (the desk's rule): the count leads this side by 1+ pt, our chance 45%+, ask 8–40¢"]);
   if (b.against) out.push(["warn", "against the count: this edge is our pre-election model arguing with a market that sees the votes"]);
   if (!r.L.pct) out.push(["warn", "not counting yet: our model vs the market"]);
+  else if (r.L.c != null && Math.abs(r.L.c) < 1 && !b.against) out.push(["warn", "count too close to read: this edge is mostly our pre-election model"]);
   else if (!b.flip && !b.against && b.ask < 0.4 && b.ours < 0.45) out.push(["warn", "not a FLIP: longshots like this lost in 2024"]);
   if (b.ask < 0.08 && r.L.pct >= 20) out.push(["warn", "market near-certain: it may see which counties are still out"]);
   return out;
@@ -290,21 +335,100 @@ function sorted(rs) {
   return rs.slice().sort((a, b) => { const x = f(a), y = f(b); if (x == null) return 1; if (y == null) return -1; return (x < y ? -1 : x > y ? 1 : 0) * ui.dir; });
 }
 function board(rs) {
-  const list = rs.filter(r => r.L.best && r.L.best.edge >= 0.03)
-    .sort((a, b) => (b.L.best.flip - a.L.best.flip) || (a.L.best.against - b.L.best.against) || (!a.L.pct - !b.L.pct) || (b.L.best.edge - a.L.best.edge));
+  // sort (user 2026-11-03: "make it so I can sort by edge"): click a heading; "Buy on Kalshi" = FLIPs first, then
+  // picks with the count, then the rest, by edge
+  const BKEY = { edge: r => r.L.best.edge, ask: r => r.L.best.ask, ours: r => r.L.best.ours, upto: r => r.L.best.upto,
+                 pct: r => r.L.pct };
+  const list = rs.filter(r => r.L.best && r.L.best.edge >= 0.03).sort(ui.bsort === "flip"
+    ? (a, b) => (b.L.best.flip - a.L.best.flip) || (a.L.best.against - b.L.best.against) || (!a.L.pct - !b.L.pct) || (b.L.best.edge - a.L.best.edge)
+    : (a, b) => { const x = BKEY[ui.bsort](a), y = BKEY[ui.bsort](b); if (x == null) return 1; if (y == null) return -1; return (x - y) * ui.bdir; });
   const nk = rs.filter(r => r.L.k).length;
   let h = `<div class="board"><h4>Kalshi board<small>${list.length} House races 3¢+ off our projection after the fee · ${nk} with live Kalshi prices · ${list.filter(r => r.L.best.flip).length} FLIP</small></h4>`;
   if (!list.length) return h + `<span class="note">Nothing 3¢+ off right now.</span></div>`;
-  h += `<table><thead><tr><th>Buy on Kalshi</th><th>Ask</th><th>Ours</th><th>Edge</th><th>Pay up to</th></tr></thead><tbody>`;
+  const bth = (k, lab) => `<th data-bsort="${k}" ${ui.bsort === k ? `aria-sort="${ui.bdir > 0 ? "ascending" : "descending"}"` : ""}>${lab}${ui.bsort === k && k !== "flip" ? (ui.bdir > 0 ? " ▲" : " ▼") : ""}</th>`;
+  h += `<table><thead><tr>${bth("flip", "Buy on Kalshi")}${bth("pct", "Counted")}${bth("ask", "Ask")}${bth("ours", "Ours")}${bth("edge", "Edge")}${bth("upto", "Pay up to")}</tr></thead><tbody>`;
   for (const r of list.slice(0, 40)) {
     const b = r.L.best, tags = whyTags(r);
     h += `<tr data-id="${r.id}"><td class="buy"><b class="${b.side === "D" ? "pos" : "neg"}">${esc(sideName(r, b.side))}</b> ${esc(b.how.startsWith("NO") ? "(NO on " + sideName(r, b.side === "D" ? "R" : "D") + ")" : "YES")}${b.flip ? '<span class="flipb">FLIP</span>' : ""}` +
       `<div class="why">${esc(r.k)} · ${r.L.pct ? r.L.pct.toFixed(0) + "% counted · " + lead(r.L.m, r) + " so far" : "not counting yet"}</div>` +
       tags.filter(t => !b.flip || t[0] === "warn").map(([c, t]) => `<div class="why ${c}">${esc(t)}</div>`).join("") + `</td>` +
-      `<td>${cents(b.ask)}</td><td>${pc(b.ours)}</td><td class="pos">+${(100 * b.edge).toFixed(0)}¢</td><td>${b.upto ? cents(b.upto) : "–"}</td></tr>`;
+      `<td>${r.L.pct ? r.L.pct.toFixed(0) + "%" : "–"}</td><td>${cents(b.ask)}</td><td>${pc(b.ours)}</td><td class="pos">+${(100 * b.edge).toFixed(0)}¢</td><td>${b.upto ? cents(b.upto) : "–"}</td></tr>`;
   }
-  h += `</tbody></table><p class="kfoot" style="margin:0">FLIPs first, then picks with the count, then the rest, by edge. Edge = our chance − ask − Kalshi's taker fee, per $1 contract; pay up to = the highest ask still 3¢+ after the fee. Our House projection sees only each district's total (not which counties are out) and leans on the pre-election model longer than the desk's, so check NYT's district map and the live book before buying: prices move in seconds after a vote dump. Kalshi prices: every 60 s.</p></div>`;
+  h += `</tbody></table><p class="kfoot" style="margin:0">Click a heading to sort (again to reverse); "Buy on Kalshi" puts FLIPs first, then picks with the count, then the rest, by edge. Edge = our chance − ask − Kalshi's taker fee, per $1 contract; pay up to = the highest ask still 3¢+ after the fee. Our House projection sees only each district's total (not which counties are out) and leans on the pre-election model longer than the desk's, so check NYT's district map and the live book before buying: prices move in seconds after a vote dump. Kalshi prices: every 60 s.</p></div>`;
   return h;
+}
+
+// ---------- cards (user 2026-11-03: "cards like the election night desk in another tab ... sort the cards on the
+// updates by edge"): one card per race, re-sorted on every update ----------
+function bar(r) {
+  const L = r.L, W = 300, H = 40, x0 = 12, x1 = W - 12;
+  const vals = [L.mu, L.m, r.m, L.mu != null ? L.mu - 1.2816 * L.sd : null, L.mu != null ? L.mu + 1.2816 * L.sd : null].filter(v => v != null);
+  const span = Math.min(40, Math.max(15, Math.ceil(Math.max(...vals.map(Math.abs), 0) / 5) * 5));
+  const X = v => x0 + (x1 - x0) * (Math.max(-span, Math.min(span, v)) + span) / (2 * span);
+  let g = `<rect x="${x0}" y="14" width="${(x1 - x0) / 2}" height="8" rx="3" fill="rgba(232,102,95,.22)"/><rect x="${X(0)}" y="14" width="${(x1 - x0) / 2}" height="8" rx="3" fill="rgba(74,144,232,.22)"/>`;
+  g += `<line x1="${X(0)}" x2="${X(0)}" y1="10" y2="26" stroke="#5d687a"/>`;
+  if (r.m != null) g += `<line x1="${X(r.m)}" x2="${X(r.m)}" y1="8" y2="28" stroke="#e2b84f" stroke-dasharray="2 2" stroke-width="1.5"/>`;
+  if (L.mu != null) {
+    const a = X(L.mu - 1.2816 * L.sd), b = X(L.mu + 1.2816 * L.sd);
+    g += `<rect x="${a}" y="13" width="${Math.max(2, b - a)}" height="10" rx="4" fill="rgba(180,138,230,.45)"/><circle cx="${X(L.mu)}" cy="18" r="5" fill="#cbb2f2" stroke="#131922" stroke-width="1.5"/>`;
+  }
+  if (L.m != null) g += `<path d="M${X(L.m) - 5},4 L${X(L.m) + 5},4 L${X(L.m)},10 Z" fill="#e7ebf1"/>`;
+  g += `<text x="${x0}" y="38">${esc(r.rl || "R")} +${span}</text><text x="${x1}" y="38" text-anchor="end">${esc(r.dl || "D")} +${span}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Projected margin with its 80% band (purple), the margin so far (white triangle) and our model (dashed)">${g}</svg>`;
+}
+
+function raceCard(r) {
+  const L = r.L, b = L.best;
+  const chip = L.call ? `<span class="chip ${L.call === "D" ? "callD" : L.call === "R" ? "callR" : "done"}">CALLED · ${esc(L.call === "D" ? r.dl : L.call === "R" ? r.rl : L.call)}</span>`
+    : L.pct == null || !L.v ? `<span class="chip">NOT REPORTING</span>`
+    : `<span class="chip ${L.pct >= 95 ? "done" : "live"}">${L.pct >= 95 ? "NEARLY DONE" : "COUNTING"} · ${L.pct.toFixed(0)}%</span>`;
+  let h = `<div class="rc ${b && b.flip ? "flipc" : b && b.edge >= 0.03 ? "edgec" : ""}" data-id="${r.id}">`;
+  h += `<div class="top"><b>${esc(short(r))}${b && b.flip ? '<span class="flipb">FLIP</span>' : ""}</b>${chip}</div>`;
+  h += `<div class="names"><span class="pos">${esc(r.d || "–")}</span><span class="neg">${esc(r.r || "–")}</span></div>`;
+  if (r.kind !== "ok") {
+    h += `<div class="note">${r.kind === "jungle" ? "Louisiana's Nov 3 round (runoff Dec 12)" + (L.lead ? ": " + esc(L.lead) + " leads" : "") : r.kind === "same-party" ? "Same-party race: no projection" : "Uncontested"}</div></div>`;
+    return h;
+  }
+  h += bar(r);
+  const lo = L.mu != null ? L.mu - 1.2816 * L.sd : null, hi = L.mu != null ? L.mu + 1.2816 * L.sd : null;
+  const fav = L.p == null ? null : L.p >= 0.5 ? "D" : "R", fp = L.p == null ? null : Math.max(L.p, 1 - L.p);
+  h += `<div class="big2"><div><small>Projected final</small><b class="${cls(L.mu ?? r.m)}">${lead(L.mu ?? r.m, r)}</b></div>` +
+    `<div class="r"><small>Win chance</small><b class="${fav === "D" ? "pos" : "neg"}">${fav ? esc(sideName(r, fav)) + " " + (fp > 0.995 ? ">99%" : (100 * fp).toFixed(0) + "%") : "–"}</b></div></div>`;
+  h += `<div class="sub2"><span>${L.mu != null ? "80%: " + lead(lo, r) + " to " + lead(hi, r) : ""}</span><span>from our model</span></div>`;
+  const left = L.pct > 0 && L.pct < 100 ? L.v * (100 / L.pct) - L.v : 0;
+  h += `<div class="kv2"><span>On screen</span><b class="${cls(L.m)}">${lead(L.m, r)}</b><span>Votes counted</span><b>${fmtInt(L.v)}</b>` +
+    `<span>Our model</span><b class="${cls(r.m)}">${lead(r.m, r)}</b><span>Votes left (est.)</span><b>${L.pct ? fmtInt(left) : "–"}</b>` +
+    `<span>Count read</span><b class="${cls(L.c)}">${L.c != null ? lead(L.c, r) : "–"}</b><span>Model win</span><b>${r.win != null ? esc(r.dl) + " " + pc(r.win) : "–"}</b></div>`;
+  if (L.k) {
+    h += `<div class="kbox">`;
+    for (const sd of ["D", "R"]) if (L.k[sd]) h += `<div class="row"><span class="${sd === "D" ? "pos" : "neg"}">Kalshi ${esc(sideName(r, sd))}</span><b>${cents(L.k[sd].bid)} / ${cents(L.k[sd].ask)}</b><span class="note">ours ${pc(sd === "D" ? L.p : 1 - L.p)}</span></div>`;
+    if (b) {
+      const tags = whyTags(r).filter(t => t[0] === "warn");
+      h += b.edge >= 0.03
+        ? `<div class="buyl ${b.flip ? "flipl" : ""}">Buy <b class="${b.side === "D" ? "pos" : "neg"}">${esc(sideName(r, b.side))}</b> ${b.how.startsWith("NO") ? "(NO on " + esc(sideName(r, b.side === "D" ? "R" : "D")) + ")" : "YES"} at ${cents(b.ask)} · edge <b class="pos">+${(100 * b.edge).toFixed(1)}¢</b>${b.upto ? " · pay up to " + cents(b.upto) : ""}</div>`
+        : `<div class="note">No edge: best is ${esc(sideName(r, b.side))} at ${cents(b.ask)} (${b.edge >= 0 ? "+" : "−"}${(100 * Math.abs(b.edge)).toFixed(1)}¢ after fee)</div>`;
+      if (b.edge >= 0.03) h += tags.map(([, t]) => `<div class="tag">${esc(t)}</div>`).join("");
+    }
+    h += `</div>`;
+  } else if (r.office === "H") h += `<div class="note">No live Kalshi market</div>`;
+  if (L.ou != null) h += `<div class="ovr">${esc(L.ou >= 0 ? r.dl : r.rl)} running <b>${Math.abs(L.ou).toFixed(1)} pts over</b> our model (count read vs model)</div>`;
+  return h + `</div>`;
+}
+
+function renderCards(rs) {
+  const vis = visible(rs), E = r => r.L.best ? r.L.best.edge : -9;
+  const by = {
+    edge: (a, b) => E(b) - E(a),
+    flip: (a, b) => ((b.L.best && b.L.best.flip) - (a.L.best && a.L.best.flip)) || E(b) - E(a),
+    close: (a, b) => (a.L.p == null ? 9 : Math.abs(a.L.p - 0.5)) - (b.L.p == null ? 9 : Math.abs(b.L.p - 0.5)),
+    pct: (a, b) => (b.L.pct || 0) - (a.L.pct || 0),
+    sh: (a, b) => Math.abs(b.L.sh || 0) - Math.abs(a.L.sh || 0),
+  }[ui.csort];
+  const list = vis.slice().sort((a, b) => by(a, b) || (b.L.pct || 0) - (a.L.pct || 0));
+  const nEdge = list.filter(r => r.L.best && r.L.best.edge >= 0.03).length;
+  document.getElementById("cnote").textContent = `${list.length} ${OFF[ui.office]} races · ${nEdge} with a Kalshi edge 3¢+ · re-sorted every update · click a card for its map and charts` +
+    (ui.office === "H" ? "" : " · Kalshi prices are on the House races (Senate and Governor prices: the data desk)");
+  document.getElementById("cgrid").innerHTML = list.map(raceCard).join("");
 }
 
 function renderSide(rs) {
@@ -388,6 +512,14 @@ function render(refit) {
     ? `<span><i style="background:rgb(${C_R})"></i>Republican likely</span><span><i style="background:rgb(64,70,84)"></i>toss-up</span><span><i style="background:rgb(${C_D})"></i>Democrat / non-Republican likely</span><span><i style="background:rgb(34,41,52)"></i>not reporting</span><span>Faded: little counted · columns: chance minus 50%</span>`
     : `<span><i style="background:rgb(${C_R})"></i>Republican ahead of our model (${full}+ pts)</span><span><i style="background:rgb(64,70,84)"></i>as expected</span><span><i style="background:rgb(${C_D})"></i>Democrat / non-Republican ahead (${full}+ pts)</span><span><i style="background:rgb(34,41,52)"></i>not reporting</span><span>Faded: little counted · drag to rotate, scroll to zoom, click for detail</span>`;
   renderSummary(all);
+  document.getElementById("views").innerHTML = [["map", "Map &amp; table"], ["cards", "Cards"]].map(([k, v]) => `<button data-view="${k}" aria-pressed="${ui.view === k}">${v}</button>`).join("");
+  document.querySelector("main").hidden = ui.view !== "map";
+  document.getElementById("legend").hidden = ui.view !== "map";
+  document.getElementById("cardsview").hidden = ui.view !== "cards";
+  const age = LIVE ? Math.round((Date.now() - genOf(LIVE)) / 1000) : null;
+  document.getElementById("status").innerHTML = lastErr && !LIVE ? `<span class="err">${esc(lastErr)}</span>` : LIVE ?
+    `data <b>${etTime(new Date(genOf(LIVE)))}</b> <span class="${age > 180 ? "err" : ""}">(${age > 180 ? "stale, " + Math.round(age / 60) + " min" : age + " s ago"})</span> · ${LIVE.states_ok}/${LIVE.states} states` : "loading…";
+  if (ui.view === "cards") { renderCards(rs); if (DECK) return; }
   renderSide(rs);
   if (!FIT || refit) FIT = viewFor(ALL_RINGS, ui.office === "H" ? 35 : 40);
   if (!DECK) {
@@ -395,9 +527,6 @@ function render(refit) {
       initialViewState: { ...FIT, minZoom: -3, maxZoom: 9 }, controller: true, layers: layers(rs), getTooltip: tooltip,
       onClick: ({ object }) => { if (object) select(object.r.id, true); } });
   } else DECK.setProps({ layers: layers(rs) });
-  const age = LIVE ? Math.round((Date.now() - genOf(LIVE)) / 1000) : null;
-  document.getElementById("status").innerHTML = lastErr && !LIVE ? `<span class="err">${esc(lastErr)}</span>` : LIVE ?
-    `data <b>${etTime(new Date(genOf(LIVE)))}</b> <span class="${age > 180 ? "err" : ""}">(${age > 180 ? "stale, " + Math.round(age / 60) + " min" : age + " s ago"})</span> · ${LIVE.states_ok}/${LIVE.states} states` : "loading…";
 }
 function select(id, zoom) {
   ui.sel = id;
@@ -407,6 +536,15 @@ function select(id, zoom) {
   if (zoom && r) flyTo(r.office === "H" ? viewFor(shapeOf(r).length ? shapeOf(r) : ALL_RINGS, 45) : viewFor(G.states[r.st] || ALL_RINGS, 45));
 }
 
+document.getElementById("views").addEventListener("click", e => {
+  const b = e.target.closest("button[data-view]");
+  if (b) { ui.view = b.dataset.view; render(false); if (ui.view === "map" && DECK) { DECK.redraw(true); } }
+});
+document.getElementById("csort").addEventListener("change", e => { ui.csort = e.target.value; render(false); });
+document.getElementById("cgrid").addEventListener("click", e => {
+  const c = e.target.closest(".rc[data-id]");
+  if (c) { ui.view = "map"; select(c.dataset.id, true); window.scrollTo(0, 0); }
+});
 document.getElementById("offices").addEventListener("click", e => { const b = e.target.closest("button[data-office]"); if (b) { ui.office = b.dataset.office; ui.sel = null; render(false); flyTo(FIT); } });
 document.getElementById("metric").addEventListener("change", e => { ui.metric = e.target.value; render(false); });
 document.getElementById("filter").addEventListener("change", e => { ui.filter = e.target.value; render(false); });
@@ -414,6 +552,8 @@ document.getElementById("q").addEventListener("input", e => { ui.q = e.target.va
 document.getElementById("board").addEventListener("change", e => { ui.board = e.target.checked; render(false); });
 document.getElementById("side").addEventListener("click", e => {
   if (e.target.closest("[data-close]")) { ui.sel = null; render(false); flyTo(FIT); return; }
+  const bt = e.target.closest("th[data-bsort]");
+  if (bt) { const k = bt.dataset.bsort; if (ui.bsort === k && k !== "flip") ui.bdir = -ui.bdir; else { ui.bsort = k; ui.bdir = k === "ask" || k === "pct" ? 1 : -1; } render(false); return; }
   const th = e.target.closest("th[data-sort]");
   if (th) { const k = th.dataset.sort; if (ui.sort === k) ui.dir = -ui.dir; else { ui.sort = k; ui.dir = k === "race" ? 1 : -1; } render(false); return; }
   const tr = e.target.closest("tr[data-id]");

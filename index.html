@@ -27,7 +27,7 @@ input { width: 150px; }
 .summary { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 16px 0; }
 .summary div { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 5px 10px; font-size: 12.5px; color: var(--muted); }
 .summary b { font: 600 15px var(--mono); color: var(--text); margin-left: 4px; }
-main { display: grid; grid-template-columns: minmax(0, 1fr) 520px; gap: 10px; padding: 8px 16px 10px; }
+main { display: grid; grid-template-columns: minmax(0, 1fr) 580px; gap: 10px; padding: 8px 16px 10px; }
 #deckmap { position: relative; height: calc(100vh - 170px); min-height: 520px; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: radial-gradient(ellipse at 50% 40%, #151c27, #0a0d12); }
 aside { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px; overflow-y: auto; max-height: calc(100vh - 170px); min-height: 520px; font-size: 12.5px; display: grid; gap: 10px; align-content: start; }
 aside h3 { margin: 0; font-size: 15px; }
@@ -51,6 +51,8 @@ tbody tr:hover td, tbody tr.sel td { background: #1a2230; }
 .board { background: var(--panel2); border: 1px solid #2c5a3c; border-radius: 8px; padding: 10px; display: grid; gap: 6px; }
 .board h4 { margin: 0; font-size: 14px; } .board h4 small { color: var(--muted); font-weight: 400; font-size: 11.5px; margin-left: 6px; }
 .board table td { white-space: normal; }
+.board td.buy { max-width: 250px; }
+.board th, .board td { padding: 2px 3px; }
 .board .buy b { font-family: var(--sans); font-weight: 600; }
 .board .why { font-family: var(--sans); font-size: 11px; color: var(--muted); }
 .board .why.warn { color: #f0b35a; }

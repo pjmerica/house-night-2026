@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Election night 2026: every race vs our model</title>
+<style>
+:root {
+  --bg: #0c1016; --panel: #131922; --panel2: #18202b; --line: #232c39; --line2: #2f3a4a;
+  --text: #e7ebf1; --muted: #8e99aa; --faint: #5d687a; --dem: #4a90e8; --rep: #e8665f;
+  --mono: "Cascadia Mono", "SF Mono", Consolas, ui-monospace, monospace;
+  --sans: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.42 var(--sans); font-variant-numeric: tabular-nums; }
+header { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 16px; border-bottom: 1px solid var(--line); }
+h1 { font-size: 18px; margin: 0 6px 0 0; }
+.chips { display: flex; gap: 6px; }
+button, select, input { background: var(--panel); color: var(--text); border: 1px solid var(--line2); border-radius: 6px; padding: 5px 10px; font: inherit; }
+button { cursor: pointer; }
+button[aria-pressed="true"] { background: #2a3550; border-color: #5a6a8a; }
+input { width: 150px; }
+.spacer { flex: 1; }
+.note { color: var(--muted); font-size: 12.5px; }
+.status { font: 12px var(--mono); color: var(--muted); }
+.status b { color: var(--text); font-weight: 500; }
+.summary { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 16px 0; }
+.summary div { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 5px 10px; font-size: 12.5px; color: var(--muted); }
+.summary b { font: 600 15px var(--mono); color: var(--text); margin-left: 4px; }
+main { display: grid; grid-template-columns: minmax(0, 1fr) 520px; gap: 10px; padding: 8px 16px 10px; }
+#deckmap { position: relative; height: calc(100vh - 170px); min-height: 520px; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: radial-gradient(ellipse at 50% 40%, #151c27, #0a0d12); }
+aside { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px; overflow-y: auto; max-height: calc(100vh - 170px); min-height: 520px; font-size: 12.5px; display: grid; gap: 10px; align-content: start; }
+aside h3 { margin: 0; font-size: 15px; }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; }
+.kv span { color: var(--muted); }
+.kv b { font-family: var(--mono); font-size: 12.5px; font-weight: 500; text-align: right; }
+.kv .gap { grid-column: 1 / -1; border-top: 1px solid var(--line); margin: 3px 0 1px; }
+.pos { color: var(--dem) !important; } .neg { color: var(--rep) !important; }
+.cbar { height: 6px; background: #2a3342; border-radius: 3px; overflow: hidden; margin: 2px 0 4px; }
+.cbar i { display: block; height: 100%; background: #c9d1dc; }
+.detail { background: var(--panel2); border: 1px solid var(--line2); border-radius: 8px; padding: 10px; display: grid; gap: 6px; }
+.detail .x { float: right; padding: 0 7px; }
+table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+th { color: var(--faint); font-weight: 500; text-align: right; padding: 3px 4px; border-bottom: 1px solid var(--line); cursor: pointer; white-space: nowrap; position: sticky; top: -10px; background: var(--panel); }
+th[aria-sort] { color: var(--text); }
+td { font-family: var(--mono); text-align: right; padding: 2px 4px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+td.nm { font-family: var(--sans); color: var(--muted); text-align: left; max-width: 150px; overflow: hidden; text-overflow: ellipsis; }
+tbody tr { cursor: pointer; }
+tbody tr:hover td, tbody tr.sel td { background: #1a2230; }
+.called { font-family: var(--sans); font-size: 10.5px; padding: 0 4px; border-radius: 3px; border: 1px solid currentColor; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted); padding: 0 16px 12px; }
+.legend i { display: inline-block; width: 14px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+.ctip { font: 12.5px/1.45 var(--sans); }
+.ctip h5 { margin: 0; font-size: 14px; }
+.ctip .sub { color: var(--muted); margin-bottom: 4px; }
+.fine { color: var(--faint); font-size: 11.5px; }
+.err { color: #f0b35a; }
+.wchart { width: 100%; height: auto; display: block; }
+.wchart text { fill: var(--faint); font: 10px var(--sans); }
+.clegend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 11.5px; color: var(--muted); }
+.clegend i { display: inline-block; width: 14px; height: 3px; border-radius: 2px; margin-right: 5px; vertical-align: 3px; }
+details summary { cursor: pointer; color: var(--muted); }
+@media (max-width: 1100px) { main { grid-template-columns: 1fr; } aside { max-height: none; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Every race vs our model</h1>
+  <div class="chips" id="offices"></div>
+  <label class="note" for="metric">Color &amp; columns</label>
+  <select id="metric">
+    <option value="sh">Projection shift (projected − model)</option>
+    <option value="ou">Over/under (count read − model)</option>
+    <option value="p">Our chance</option>
+  </select>
+  <select id="filter" aria-label="Which races">
+    <option value="all">All races</option>
+    <option value="close">Close (model 10–90%)</option>
+    <option value="counting">Counting</option>
+    <option value="uncalled">Not called</option>
+  </select>
+  <input id="q" type="search" placeholder="Find race or name" aria-label="Find a race">
+  <div class="spacer"></div>
+  <div class="status" id="status">loading…</div>
+</header>
+<div class="summary" id="summary"></div>
+<main>
+  <div id="deckmap" aria-label="3D map: every race against our model"></div>
+  <aside id="side"></aside>
+</main>
+<div class="legend" id="legend"></div>
+<script src="house_bench.js"></script>
+<script src="house_geo.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/deck.gl@8.9.35/dist.min.js"></script>
+<script>
+"use strict";
+/* Every House, Senate and Governor race, separate from the data desk. live.json / hist.json come from the branch
+   `live`, written every 60 s by night.py in GitHub Actions from NYT's 50 state pages: each race's count, the desk's
+   v0 projection started from our margin model, and the over/under. No markets (a separate thing). */
+const REPO = "pjmerica/house-night-2026";
+const LOCAL = new URLSearchParams(location.search).has("local");
+const RAW = f => LOCAL ? f : `https://raw.githubusercontent.com/${REPO}/live/${f}`;
+const API = f => `https://api.github.com/repos/${REPO}/contents/${f}?ref=live`;
+const B = window.HOUSE_BENCH, G = window.HOUSE_GEO;
+const BY = Object.fromEntries(B.races.map(r => [r.id, r]));
+const C_D = [74, 144, 232], C_R = [232, 102, 95], FULL = { sh: 8, ou: 15 };
+const OFF = { H: "House", S: "Senate", G: "Governor" };
+const ui = { office: "H", metric: "sh", filter: "all", q: "", sel: null, sort: "default", dir: 1, hover: null };
+let LIVE = null, HIST = {}, DECK = null, FIT = null, lastErr = null, apiAt = 0, apiOff = 0, histAt = 0;
+
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const fmtInt = n => Math.round(n || 0).toLocaleString("en-US");
+const etTime = d => d.toLocaleTimeString("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit" }) + " ET";
+const cls = v => v > 0 ? "pos" : v < 0 ? "neg" : "";
+const short = r => r.office === "H" ? r.k : r.k.replace("-S", " (special)") + " " + OFF[r.office];
+function lead(m, r) { return m == null ? "–" : Math.abs(m) < 0.05 ? "tied" : `${m > 0 ? (r.dl || "D") : (r.rl || "R")} +${Math.abs(m).toFixed(1)}`; }
+const sgn = (v, d = 1) => v == null ? "–" : (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(d);
+const pc = p => p == null ? "–" : (100 * p).toFixed(p > 0.995 || p < 0.005 ? 1 : 0) + "%";
+
+// ---------- data ----------
+const genOf = j => j ? Date.parse(j.generated) || 0 : 0;
+async function getJson(f, wantFresh) {
+  let j = null;
+  try { const r = await fetch(RAW(f) + (LOCAL ? "" : "?t=" + Date.now()), { cache: "no-store" }); if (r.ok) j = await r.json(); } catch (e) { /* the API next */ }
+  if (!LOCAL && wantFresh && (!j || Date.now() - genOf(j) > 120000) && Date.now() > apiOff && Date.now() - apiAt > 110000) {
+    apiAt = Date.now();
+    try {
+      const r = await fetch(API(f), { headers: { Accept: "application/vnd.github.raw" }, cache: "no-cache" });
+      if (r.status === 403 || r.status === 429) apiOff = Date.now() + 600000;
+      if (r.ok) { const a = await r.json(); if (!j || genOf(a) > genOf(j)) j = a; }
+    } catch (e) { /* keep raw's copy */ }
+  }
+  return j;
+}
+async function refresh() {
+  const j = await getJson("live.json", true);
+  if (j && genOf(j) >= genOf(LIVE)) { LIVE = j; lastErr = null; } else if (!j) lastErr = "couldn't load live.json";
+  if (Date.now() - histAt > 120000) { const h = await getJson("hist.json", false); if (h) { HIST = h; histAt = Date.now(); } }
+  render(false);
+}
+
+function visible(rs) {
+  const q = ui.q.trim().toLowerCase();
+  return rs.filter(r => {
+    if (ui.filter === "close" && !(r.win != null && r.win >= 0.1 && r.win <= 0.9)) return false;
+    if (ui.filter === "counting" && !(r.L.v > 0)) return false;
+    if (ui.filter === "uncalled" && r.L.call) return false;
+    if (q && !(r.k.toLowerCase().includes(q) || (r.d || "").toLowerCase().includes(q) || (r.r || "").toLowerCase().includes(q))) return false;
+    return true;
+  });
+}
+const metricOf = r => ui.metric === "p" ? (r.L.p == null ? null : 100 * (r.L.p - 0.5)) : r.L[ui.metric];
+
+// ---------- shapes ----------
+function centroid(ring) {
+  let a = 0, cx = 0, cy = 0;
+  for (let i = 0; i < ring.length; i++) { const [x0, y0] = ring[i], [x1, y1] = ring[(i + 1) % ring.length], f = x0 * y1 - x1 * y0; a += f; cx += (x0 + x1) * f; cy += (y0 + y1) * f; }
+  return a ? [cx / (3 * a), cy / (3 * a)] : ring[0];
+}
+const STATE_C = Object.fromEntries(Object.entries(G.states).map(([k, rs]) => [k, centroid(rs.reduce((m, r) => r.length > m.length ? r : m, rs[0]))]));
+const shapeOf = r => r.office === "H" ? (G.districts[r.k] || {}).rings || [] : G.states[r.st] || [];
+const posOf = r => {
+  if (r.office === "H") return (G.districts[r.k] || {}).c;
+  const c = STATE_C[r.st]; return c && r.special ? [c[0] + 9, c[1] - 9] : c;     // a special beside the regular race
+};
+function bbox(rings) {
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  for (const ring of rings) for (const [x, y] of ring) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+  return [x0, y0, x1, y1];
+}
+function viewFor(rings, tilt) {
+  const [x0, y0, x1, y1] = bbox(rings), el = document.getElementById("deckmap"), w = Math.max(x1 - x0, 6), h = Math.max(y1 - y0, 6);
+  const pad = w < 100 ? 2.2 : 1.25, zoom = Math.log2(Math.min(el.clientWidth / (w * pad), el.clientHeight / (h * pad * 1.2)));
+  return { target: [(x0 + x1) / 2, (y0 + y1) / 2 + h * 0.05, 0], zoom, rotationX: tilt, rotationOrbit: -8, size: Math.max(w, h) };
+}
+const ALL_RINGS = Object.values(G.states).flat();
+
+// ---------- color ----------
+function fill(r) {
+  if (r.kind !== "ok" && r.kind !== "jungle") return [40, 46, 58, 200];
+  const v = metricOf(r);
+  if (v == null) return [34, 41, 52, 235];
+  const full = ui.metric === "p" ? 50 : FULL[ui.metric];
+  const t = Math.max(-1, Math.min(1, v / full)), k = Math.sqrt(Math.abs(t)), base = [64, 70, 84], tgt = t > 0 ? C_D : C_R;
+  const pct = r.L.pct || 0, a = Math.round(255 * Math.min(1, 0.4 + 0.6 * pct / 90));
+  return [0, 1, 2].map(i => Math.round(base[i] + (tgt[i] - base[i]) * k)).concat([a]);
+}
+
+// ---------- cards ----------
+function card(r, full) {
+  const L = r.L, two = (L.dv || 0) + (L.rv || 0);
+  let h = `<h5>${esc(short(r))}${L.call ? ` <span class="called ${L.call === "D" ? "pos" : L.call === "R" ? "neg" : ""}">called: ${esc(L.call === "D" ? r.dl : L.call === "R" ? r.rl : L.call)}</span>` : ""}</h5>`;
+  h += `<div class="sub">${esc(r.d || "–")} (${esc((r.dp || "").slice(0, 3))}) vs ${esc(r.r || "–")} (REP)${r.kind === "jungle" ? " · Louisiana's Nov 3 round: a runoff Dec 12 if nobody passes 50%" : r.kind === "same-party" ? " · same-party race: no projection" : r.kind === "uncontested" ? " · uncontested" : ""}</div>`;
+  h += `<div class="kv"><span>Counted</span><b>${L.pct == null ? "not reporting" : L.pct.toFixed(0) + "% · " + fmtInt(L.v) + " votes"}</b></div>`;
+  if (L.pct != null) h += `<div class="cbar"><i style="width:${Math.min(100, L.pct)}%"></i></div>`;
+  h += `<div class="kv">`;
+  if (two) h += `<span>${esc(r.dl)}</span><b>${fmtInt(L.dv)} · ${(100 * L.dv / L.v).toFixed(1)}%</b><span>${esc(r.rl)}</span><b>${fmtInt(L.rv)} · ${(100 * L.rv / L.v).toFixed(1)}%</b>`;
+  if (r.kind === "jungle" && L.lead) h += `<span>Leading</span><b>${esc(L.lead)}</b>`;
+  h += `<span>Margin so far</span><b class="${cls(L.m)}">${lead(L.m, r)}</b><i class="gap"></i>`;
+  h += `<span>Our model (before the count)</span><b class="${cls(r.m)}">${lead(r.m, r)}${r.win != null ? " · " + pc(r.win) : ""}</b>`;
+  if (r.basis === "fundamentals") h += `<span></span><b style="font-family:var(--sans);color:var(--faint)">no polls: fundamentals model</b>`;
+  if (L.c != null) h += `<span>Count read (late shift applied)</span><b class="${cls(L.c)}">${lead(L.c, r)} ± ${L.csd.toFixed(1)}</b>`;
+  if (L.ou != null) h += `<span>Over/under vs model</span><b class="${cls(L.ou)}">${sgn(L.ou)} pts</b>`;
+  if (L.mu != null) {
+    h += `<i class="gap"></i><span>Projected final</span><b class="${cls(L.mu)}">${lead(L.mu, r)}</b>`;
+    h += `<span>80% band</span><b>${lead(L.mu - 1.2816 * L.sd, r)} to ${lead(L.mu + 1.2816 * L.sd, r)}</b>`;
+    h += `<span>Projection shift</span><b class="${cls(L.sh)}">${sgn(L.sh)} pts</b>`;
+    h += `<span>Our chance</span><b><span class="pos">${esc(r.dl)} ${pc(L.p)}</span> · <span class="neg">${esc(r.rl)} ${pc(1 - L.p)}</span></b>`;
+  }
+  h += `</div>`;
+  if (full) {
+    const hs = HIST[r.id] || [];
+    if (hs.length > 1) {
+      const pts = hs.map(x => ({ t: x[0], pct: x[1], m: x[2], mu: x[3], p: x[4] == null ? null : 100 * x[4] }));
+      h += `<div class="note">${esc(r.dl)}'s chance through the night</div>` + chart(pts, [{ k: "p", color: "#4a90e8", label: "Our chance (" + esc(r.dl) + ")" }], [0, 100], v => v + "%", 50);
+      const vals = pts.flatMap(p => [p.m, p.mu]).filter(v => v != null);
+      const lo = Math.max(-60, Math.floor(Math.min(-5, ...vals, r.m) / 5) * 5), hi = Math.min(60, Math.ceil(Math.max(5, ...vals, r.m) / 5) * 5);
+      h += `<div class="note">Margin, points (+ = ${esc(r.dl)} ahead)</div>` + chart(pts, [{ k: "mu", color: "#4a90e8", label: "Projected final" }, { k: "m", color: "#c9d1dc", label: "Margin so far" }], [lo, hi], v => (v > 0 ? "+" : "") + v, 0, r.m);
+    }
+    const own = (B.lean[r.st] || []).some(x => x[0] !== 0);
+    h += `<div class="fine">Count read: the margin so far plus the votes still out moving ${own ? `the way ${esc(r.st)}'s late votes moved in 2020–24 statewide races` : `with no lean (we have no ${esc(r.st)} count history; the spread is all states')`}, as the desk's v0. Projection: that read and our model (± ${B.model_sd} pts) combined by how sure each is. A district's count can run differently from its state's.</div>`;
+  }
+  return h;
+}
+
+function chart(pts, series, yr, fmtY, mid, ref) {
+  const W = 480, H = 120, l = 30, rr = 6, t = 6, b = 18;
+  const ts = pts.map(p => Date.parse(p.t)), t0 = ts[0], t1 = Math.max(ts[ts.length - 1], t0 + 60000);
+  const X = v => l + (W - l - rr) * (v - t0) / (t1 - t0), Y = v => t + (H - t - b) * (1 - (Math.max(yr[0], Math.min(yr[1], v)) - yr[0]) / (yr[1] - yr[0]));
+  let g = "", ticks = [];
+  const st = yr[1] - yr[0] > 60 ? 25 : yr[1] - yr[0] > 24 ? 10 : 5;
+  for (let v = Math.ceil(yr[0] / st) * st; v <= yr[1]; v += st) ticks.push(v);
+  for (const v of ticks) g += `<line x1="${l}" x2="${W - rr}" y1="${Y(v)}" y2="${Y(v)}" stroke="${v === mid ? "#46536a" : "#212a37"}"/><text x="${l - 4}" y="${Y(v) + 3}" text-anchor="end">${fmtY(v)}</text>`;
+  if (ref != null) g += `<line x1="${l}" x2="${W - rr}" y1="${Y(ref)}" y2="${Y(ref)}" stroke="#8e99aa" stroke-dasharray="3 3"/>`;
+  const fmtT = v => new Date(v).toLocaleTimeString("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit" });
+  g += `<text x="${l}" y="${H - 4}">${fmtT(t0)}</text><text x="${W - rr}" y="${H - 4}" text-anchor="end">${fmtT(t1)}</text>`;
+  for (const s of series) {
+    let d = "", pen = false;
+    for (const p of pts) { if (p[s.k] == null) { pen = false; continue; } d += (pen ? "L" : "M") + X(Date.parse(p.t)).toFixed(1) + "," + Y(p[s.k]).toFixed(1); pen = true; }
+    g += `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round"/>`;
+  }
+  return `<svg class="wchart" viewBox="0 0 ${W} ${H}" role="img">${g}</svg><div class="clegend">${series.map(s => `<span><i style="background:${s.color}"></i>${s.label}</span>`).join("")}${ref != null ? `<span><i style="background:#8e99aa"></i>Our model (dashed)</span>` : ""}</div>`;
+}
+
+// ---------- side panel ----------
+const COLS = [
+  ["race", "Race", r => r.k], ["pct", "Counted", r => r.L.pct], ["m", "Margin", r => r.L.m], ["model", "Model", r => r.m],
+  ["mu", "Projected", r => r.L.mu], ["p", "Chance (D)", r => r.L.p], ["ou", "Over/under", r => r.L.ou], ["sh", "Shift", r => r.L.sh]];
+function sorted(rs) {
+  if (ui.sort === "default") {   // the closest projected races first, then by counted
+    return rs.slice().sort((a, b) => (a.L.p == null ? 9 : Math.abs(a.L.p - 0.5)) - (b.L.p == null ? 9 : Math.abs(b.L.p - 0.5)) || (b.L.pct || 0) - (a.L.pct || 0));
+  }
+  const f = COLS.find(c => c[0] === ui.sort)[2];
+  return rs.slice().sort((a, b) => { const x = f(a), y = f(b); if (x == null) return 1; if (y == null) return -1; return (x < y ? -1 : x > y ? 1 : 0) * ui.dir; });
+}
+function renderSide(rs) {
+  let h = "";
+  const sel = ui.sel && rs.find(r => r.id === ui.sel);
+  if (sel) h += `<div class="detail ctip"><div><button class="x" data-close>×</button></div>${card(sel, true)}</div>`;
+  const vis = sorted(visible(rs));
+  h += `<div class="note">${vis.length} of ${rs.length} ${OFF[ui.office]} races. Click a row or the map for detail. Sorted ${ui.sort === "default" ? "closest projection first" : "by " + COLS.find(c => c[0] === ui.sort)[1]}; click a heading to sort.</div>`;
+  h += `<table><thead><tr>${COLS.map(c => `<th data-sort="${c[0]}" ${ui.sort === c[0] ? `aria-sort="${ui.dir > 0 ? "ascending" : "descending"}"` : ""}>${c[1]}</th>`).join("")}</tr></thead><tbody>`;
+  for (const r of vis) {
+    const L = r.L;
+    h += `<tr data-id="${r.id}" class="${r.id === ui.sel ? "sel" : ""}"><td>${esc(short(r))}${L.call ? ` <span class="called ${L.call === "D" ? "pos" : L.call === "R" ? "neg" : ""}">${L.call === "D" || L.call === "R" ? L.call : "✓"}</span>` : ""}</td>` +
+      `<td>${L.pct == null ? "–" : L.pct.toFixed(0) + "%"}</td><td class="${cls(L.m)}">${L.m == null ? "–" : (L.m > 0 ? "D+" : "R+") + Math.abs(L.m).toFixed(1)}</td>` +
+      `<td class="${cls(r.m)}">${r.m == null ? "–" : (r.m > 0 ? "D+" : "R+") + Math.abs(r.m).toFixed(1)}</td>` +
+      `<td class="${cls(L.mu)}">${L.mu == null ? "–" : (L.mu > 0 ? "D+" : "R+") + Math.abs(L.mu).toFixed(1)}</td><td>${pc(L.p)}</td>` +
+      `<td class="${cls(L.ou)}">${sgn(L.ou)}</td><td class="${cls(L.sh)}">${sgn(L.sh)}</td></tr>`;
+  }
+  h += `</tbody></table><p class="fine" style="margin:0">Race: a check = called by NYT. Counted: NYT's share of the expected vote. Margin: D (or the non-Republican) minus R so far, points of all votes. Model: our margin model's forecast before the count (fundamentals model where a race had no polls). Projected: our final-margin projection now. Chance (D): its chance the Democrat/non-Republican wins. Over/under: the count read (the margin so far with the state's usual late shift on the votes still out) minus the model, + = the Democrat ahead of it. Shift: projected minus model, the over/under weighed by how sure the count read is. Separate from the data desk; no markets.</p>`;
+  document.getElementById("side").innerHTML = h;
+}
+
+function renderSummary(all) {
+  let h = "";
+  for (const o of ["H", "S", "G"]) {
+    const rs = all.filter(r => r.office === o);
+    let cd = 0, cr = 0, exp = 0;
+    for (const r of rs) {
+      const L = r.L;
+      if (L.call === "D") cd++; else if (L.call === "R") cr++;
+      if (L.call === "D") exp += 1; else if (L.call === "R") exp += 0;
+      else if (L.p != null) exp += L.p;
+      else if (r.kind === "same-party" || r.kind === "uncontested") exp += r.dp && !r.r ? 1 : (r.r && !r.d ? 0 : (r.dp === "DEM" ? 1 : 0));
+      else if (r.win != null) exp += r.win;
+    }
+    h += `<div>${OFF[o]} (${rs.length} up): called <b class="pos">D ${cd}</b> <b class="neg">R ${cr}</b> · expected D seats from our projections <b>${exp.toFixed(1)}</b></div>`;
+  }
+  document.getElementById("summary").innerHTML = h;
+}
+
+// ---------- map ----------
+function layers(rs) {
+  const L = window.deck, polys = [], cols = [];
+  for (const r of rs) for (const ring of shapeOf(r)) polys.push({ ring, r });
+  for (const r of visible(rs)) { const v = metricOf(r), pos = posOf(r); if (v != null && pos && r.L.v > 0) cols.push({ r, v, pos }); }
+  const maxAbs = ui.metric === "p" ? 50 : Math.max(FULL[ui.metric] * 1.5, ...cols.map(c => Math.min(Math.abs(c.v), FULL[ui.metric] * 3)));
+  const size = FIT ? FIT.size : 900, H = size * (ui.office === "H" ? 0.12 : 0.2), radius = ui.office === "H" ? size / 330 : size / 120;
+  const vis = new Set(visible(rs).map(r => r.id));
+  const out = [
+    new L.PolygonLayer({ id: "shapes", data: polys, getPolygon: d => d.ring, pickable: true, stroked: true, filled: true,
+      getFillColor: d => { const c = fill(d.r); return vis.has(d.r.id) ? c : [c[0], c[1], c[2], 60]; },
+      getLineColor: d => d.r.id === ui.sel ? [240, 244, 250, 255] : [12, 16, 22, 255], lineWidthUnits: "pixels",
+      getLineWidth: d => d.r.id === ui.sel ? 2.5 : 0.4,
+      updateTriggers: { getFillColor: [LIVE && LIVE.generated, ui.metric, ui.filter, ui.q, ui.office], getLineColor: [ui.sel], getLineWidth: [ui.sel] } }),
+    new L.PathLayer({ id: "states", data: ui.office === "H" ? ALL_RINGS : [], getPath: d => d.concat([d[0]]), getColor: [150, 160, 178, 160], widthUnits: "pixels", getWidth: 1 }),
+    new L.ColumnLayer({ id: "cols", data: cols, diskResolution: 10, radius, extruded: true, pickable: true,
+      getPosition: c => c.pos, getElevation: c => Math.min(Math.abs(c.v), maxAbs) / maxAbs * H,
+      getFillColor: c => c.v >= 0 ? [...C_D, 235] : [...C_R, 235], material: { ambient: 0.45, diffuse: 0.6, shininess: 24 },
+      updateTriggers: { getElevation: [LIVE && LIVE.generated, ui.metric, ui.office, maxAbs], getFillColor: [LIVE && LIVE.generated, ui.metric] } }),
+  ];
+  return out;
+}
+function tooltip({ object }) {
+  if (!object) return null;
+  const r = object.r;
+  return { html: `<div class="ctip">${card(r, false)}</div>`, style: { background: "#131922", color: "#e7ebf1", border: "1px solid #2f3a4a", borderRadius: "6px", padding: "9px 11px", width: "330px" } };
+}
+function flyTo(view) { DECK.setProps({ initialViewState: { ...view, minZoom: -3, maxZoom: 9, transitionDuration: 600 } }); }
+
+function render(refit) {
+  const lv = Object.fromEntries(((LIVE && LIVE.races) || []).map(x => [x.id, x]));
+  const all = B.races.map(r => ({ ...r, L: lv[r.id] || {} }));
+  const rs = all.filter(r => r.office === ui.office);
+  document.getElementById("offices").innerHTML = Object.entries(OFF).map(([k, v]) => `<button data-office="${k}" aria-pressed="${ui.office === k}">${v}</button>`).join("");
+  const full = ui.metric === "p" ? null : FULL[ui.metric];
+  document.getElementById("legend").innerHTML = ui.metric === "p"
+    ? `<span><i style="background:rgb(${C_R})"></i>Republican likely</span><span><i style="background:rgb(64,70,84)"></i>toss-up</span><span><i style="background:rgb(${C_D})"></i>Democrat / non-Republican likely</span><span><i style="background:rgb(34,41,52)"></i>not reporting</span><span>Faded: little counted · columns: chance minus 50%</span>`
+    : `<span><i style="background:rgb(${C_R})"></i>Republican ahead of our model (${full}+ pts)</span><span><i style="background:rgb(64,70,84)"></i>as expected</span><span><i style="background:rgb(${C_D})"></i>Democrat / non-Republican ahead (${full}+ pts)</span><span><i style="background:rgb(34,41,52)"></i>not reporting</span><span>Faded: little counted · drag to rotate, scroll to zoom, click for detail</span>`;
+  renderSummary(all);
+  renderSide(rs);
+  if (!FIT || refit) FIT = viewFor(ALL_RINGS, ui.office === "H" ? 35 : 40);
+  if (!DECK) {
+    DECK = new window.deck.Deck({ parent: document.getElementById("deckmap"), views: new window.deck.OrbitView({ orbitAxis: "Z", fovy: 35 }),
+      initialViewState: { ...FIT, minZoom: -3, maxZoom: 9 }, controller: true, layers: layers(rs), getTooltip: tooltip,
+      onClick: ({ object }) => { if (object) select(object.r.id, true); } });
+  } else DECK.setProps({ layers: layers(rs) });
+  const age = LIVE ? Math.round((Date.now() - genOf(LIVE)) / 1000) : null;
+  document.getElementById("status").innerHTML = lastErr && !LIVE ? `<span class="err">${esc(lastErr)}</span>` : LIVE ?
+    `data <b>${etTime(new Date(genOf(LIVE)))}</b> <span class="${age > 180 ? "err" : ""}">(${age > 180 ? "stale, " + Math.round(age / 60) + " min" : age + " s ago"})</span> · ${LIVE.states_ok}/${LIVE.states} states` : "loading…";
+}
+function select(id, zoom) {
+  ui.sel = id;
+  const r = BY[id];
+  if (r && r.office !== ui.office) ui.office = r.office;
+  render(false);
+  if (zoom && r) flyTo(r.office === "H" ? viewFor(shapeOf(r).length ? shapeOf(r) : ALL_RINGS, 45) : viewFor(G.states[r.st] || ALL_RINGS, 45));
+}
+
+document.getElementById("offices").addEventListener("click", e => { const b = e.target.closest("button[data-office]"); if (b) { ui.office = b.dataset.office; ui.sel = null; render(false); flyTo(FIT); } });
+document.getElementById("metric").addEventListener("change", e => { ui.metric = e.target.value; render(false); });
+document.getElementById("filter").addEventListener("change", e => { ui.filter = e.target.value; render(false); });
+document.getElementById("q").addEventListener("input", e => { ui.q = e.target.value; render(false); });
+document.getElementById("side").addEventListener("click", e => {
+  if (e.target.closest("[data-close]")) { ui.sel = null; render(false); flyTo(FIT); return; }
+  const th = e.target.closest("th[data-sort]");
+  if (th) { const k = th.dataset.sort; if (ui.sort === k) ui.dir = -ui.dir; else { ui.sort = k; ui.dir = k === "race" ? 1 : -1; } render(false); return; }
+  const tr = e.target.closest("tr[data-id]");
+  if (tr) { select(tr.dataset.id, true); document.getElementById("side").scrollTop = 0; }
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape" && ui.sel) { ui.sel = null; render(false); flyTo(FIT); } });
+window.addEventListener("resize", () => { if (DECK) { FIT = viewFor(ALL_RINGS, ui.office === "H" ? 35 : 40); } });
+render(true);
+refresh();
+setInterval(refresh, 30000);
+</script>
+</body>
+</html>

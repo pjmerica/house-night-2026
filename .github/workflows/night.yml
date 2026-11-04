@@ -4,7 +4,12 @@ name: Every race live
 # model and the desk's v0 projection, written to live.json + hist.json on the orphan branch `live` (one commit,
 # amended and force-pushed). index.html reads them. Start: gh workflow run night.yml   Stop: gh run cancel <id>
 
+# A job runs ~5h40m (GitHub stops jobs at 6h), then dispatches the next, which starts when it ends. The cron is the
+# backstop if a job dies. Stops after Dec 14: the late count (user 2026-11-04: "keep recording those votes").
 on:
+  schedule:
+    - cron: '17,47 * * 11 *'
+    - cron: '17,47 * 1-14 12 *'
   workflow_dispatch:
     inputs:
       minutes:
@@ -13,7 +18,7 @@ on:
 
 concurrency:
   group: live
-  cancel-in-progress: true
+  cancel-in-progress: false      # the backstop cron must never cancel a running job
 
 jobs:
   live:
@@ -21,6 +26,7 @@ jobs:
     timeout-minutes: 355
     permissions:
       contents: write
+      actions: write
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -40,4 +46,18 @@ jobs:
           fi
           git -C state config user.name "every-race-live"
           git -C state config user.email "actions@users.noreply.github.com"
+      - run: date -u +%s > started
       - run: python night.py --minutes "${{ inputs.minutes || 340 }}" --state state
+      # Only after a full-length job: one that dies in its first minutes must not dispatch itself in a tight loop.
+      - name: Dispatch the next job
+        if: ${{ always() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ran=$(( $(date -u +%s) - $(cat started) ))
+          if [ "$ran" -gt 1200 ] && [ "$(date -u +%s)" -lt "$(date -u -d 2026-12-15T05:00:00Z +%s)" ]; then
+            gh workflow run night.yml --repo "$GITHUB_REPOSITORY" --ref main
+            echo "dispatched the next job after ${ran}s"
+          else
+            echo "not dispatching (ran ${ran}s)"
+          fi

@@ -36,6 +36,8 @@ over half the district's vote, at 0%). The card lists the biggest counties still
     py night.py --minutes 340 [--state DIR] [--once]
 """
 import argparse
+import gzip
+import hashlib
 import json
 import math
 import os
@@ -49,7 +51,9 @@ import county_project      # polling-agg's projector v1 (Election night simulato
 HERE = os.path.dirname(os.path.abspath(__file__))
 NYT = "https://static01.nyt.com/elections-assets/pages/data/2026-11-03/results-{}.json"
 UA = {"User-Agent": "house-night-2026 (github.com/pjmerica/house-night-2026)"}
-PASS = 60
+PASS = 120          # was 60 on the night; weeks of passes through the late count
+AT_LARGE = {"AK", "DE", "ND", "SD", "VT", "WY"}     # results-{state}-us-house-at-large.json
+SNAP_EVERY = 600    # snapshots/: the whole board (projections, prices, edges) at most this often, when it changed
 KALSHI = "https://api.elections.kalshi.com/trade-api/v2"
 FLIP_MIN_P, FLIP_MIN_EDGE, FLIP_MAX_ASK, FLIP_MIN_PCT = 0.45, 0.05, 0.40, 20.0
 # House only: no FLIP under 8c. The 2024 flips that paid were bought at 15-33c; a district price of a few cents with
@@ -228,7 +232,7 @@ def fetch_district(job):
     race, = job
     st, n = race["k"].split("-")
     try:
-        url = DIST.format(SLUG[st], int(n)) + f"?t={int(time.time())}"
+        url = (DIST.format(SLUG[st], "at-large") if st in AT_LARGE else DIST.format(SLUG[st], int(n))) + f"?t={int(time.time())}"
         with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=40) as r:
             return race["id"], json.loads(r.read())
     except Exception:
@@ -349,6 +353,7 @@ def main():
             hist = {}
     cache, errors = {}, {}
     end = time.time() + 60 * a.minutes
+    snap_at, snap_sig = 0.0, None
     while True:
         t0 = time.time()
         now = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
@@ -430,12 +435,21 @@ def main():
                       ((row.get("k") or {}).get("D") or {}).get("ask")]
                 if not h or h[-1][1:3] != pt[1:3] or h[-1][4] != pt[4] or h[-1][5:6] != pt[5:6]:
                     h.append(pt)
-                    del h[:-200]
+                    del h[:-3000]
         data = dict(generated=now, model_sd=bench["model_sd"], races=rows, errors=errors,
                     states_ok=len(cache), states=len({r["st"] for r in races}))
         try:
             write(os.path.join(out_dir, "live.json"), data)
             write(os.path.join(out_dir, "hist.json"), hist)
+            # the record of what the page showed: live.json is overwritten every pass, and hist.json keeps only the
+            # Democrat's Kalshi ask; these keep both sides' prices, edges, FLIPs and counties still out
+            body = json.dumps(rows, separators=(",", ":"), sort_keys=True).encode()
+            sig = hashlib.sha1(body).hexdigest()
+            if sig != snap_sig and time.time() - snap_at >= SNAP_EVERY:
+                snap_at, snap_sig = time.time(), sig
+                os.makedirs(os.path.join(out_dir, "snapshots"), exist_ok=True)
+                with gzip.open(os.path.join(out_dir, "snapshots", time.strftime("%Y%m%dT%H%M%SZ", time.gmtime()) + ".json.gz"), "wb") as f:
+                    f.write(body)
             if a.state:
                 git_publish(a.state, "live " + now)
         except Exception as e:

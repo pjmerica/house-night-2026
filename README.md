@@ -42,3 +42,10 @@ copied unchanged): each county's lean is its 2024 presidential two-party share (
 NYT's expected vote, started from our model (sd 6.1). Where the units don't line up (Connecticut's towns tonight,
 Alaska) the race keeps v0 on the district total, tagged on the page. Cards and the detail panel list the biggest
 counties still out (share counted, votes left, 2024 lean, what the rest is expected to give).
+
+## Late count and the record
+
+The job runs through Dec 14 (a pass every 2 minutes; each job dispatches the next, and a cron restarts it if one dies).
+The `live` branch keeps `hist.json` (each race's path: time, share counted, margin, projection, chance, Kalshi ask) and
+`snapshots/` (the whole board at most every 10 minutes when it changed: both sides' prices, edges, FLIPs, counties still
+out). Every district's NYT file, by county, is recorded by polling-agg's cloud job in the release `election-night-2026`.

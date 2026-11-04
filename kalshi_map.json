@@ -1,0 +1,1762 @@
+{
+"AK-01": [
+{
+"D": "HOUSEAKAL-26-D",
+"R": "HOUSEAKAL-26-R",
+"event": "HOUSEAKAL-26",
+"mult": 1.0
+}
+],
+"AL-01": [
+{
+"D": "KXHOUSERACE-AL01-26-D",
+"R": "KXHOUSERACE-AL01-26-R",
+"event": "KXHOUSERACE-AL01-26",
+"mult": 1.0
+}
+],
+"AL-02": [
+{
+"D": "KXHOUSERACE-AL02-26-D",
+"R": "KXHOUSERACE-AL02-26-R",
+"event": "KXHOUSERACE-AL02-26",
+"mult": 1.0
+}
+],
+"AL-05": [
+{
+"D": "KXHOUSERACE-AL05-26-D",
+"R": "KXHOUSERACE-AL05-26-R",
+"event": "KXHOUSERACE-AL05-26",
+"mult": 1.0
+}
+],
+"AL-06": [
+{
+"D": "KXHOUSERACE-AL06-26-D",
+"R": "KXHOUSERACE-AL06-26-R",
+"event": "KXHOUSERACE-AL06-26",
+"mult": 1.0
+}
+],
+"AR-02": [
+{
+"D": "KXHOUSERACE-AR02-26-D",
+"R": "KXHOUSERACE-AR02-26-R",
+"event": "KXHOUSERACE-AR02-26",
+"mult": 1.0
+}
+],
+"AR-03": [
+{
+"D": "KXHOUSERACE-AR03-26-D",
+"R": "KXHOUSERACE-AR03-26-R",
+"event": "KXHOUSERACE-AR03-26",
+"mult": 1.0
+}
+],
+"AZ-01": [
+{
+"D": "HOUSEAZ1-26-D",
+"R": "HOUSEAZ1-26-R",
+"event": "HOUSEAZ1-26",
+"mult": 1.0
+}
+],
+"AZ-02": [
+{
+"D": "HOUSEAZ2-26-D",
+"R": "HOUSEAZ2-26-R",
+"event": "HOUSEAZ2-26",
+"mult": 1.0
+}
+],
+"AZ-05": [
+{
+"D": "KXHOUSERACE-AZ05-26-D",
+"R": "KXHOUSERACE-AZ05-26-R",
+"event": "KXHOUSERACE-AZ05-26",
+"mult": 1.0
+}
+],
+"AZ-06": [
+{
+"D": "HOUSEAZ6-26-D",
+"R": "HOUSEAZ6-26-R",
+"event": "HOUSEAZ6-26",
+"mult": 1.0
+}
+],
+"AZ-08": [
+{
+"D": "KXHOUSERACE-AZ08-26-D",
+"R": "KXHOUSERACE-AZ08-26-R",
+"event": "KXHOUSERACE-AZ08-26",
+"mult": 1.0
+}
+],
+"AZ-09": [
+{
+"D": "KXHOUSERACE-AZ09-26-D",
+"R": "KXHOUSERACE-AZ09-26-R",
+"event": "KXHOUSERACE-AZ09-26",
+"mult": 1.0
+}
+],
+"CA-01": [
+{
+"D": "KXHOUSERACE-CA01-26-D",
+"R": "KXHOUSERACE-CA01-26-R",
+"event": "KXHOUSERACE-CA01-26",
+"mult": 1.0
+}
+],
+"CA-02": [
+{
+"D": "KXHOUSERACE-CA02-26-D",
+"R": "KXHOUSERACE-CA02-26-R",
+"event": "KXHOUSERACE-CA02-26",
+"mult": 1.0
+}
+],
+"CA-03": [
+{
+"D": "HOUSECA3-26-D",
+"R": "HOUSECA3-26-R",
+"event": "HOUSECA3-26",
+"mult": 1.0
+}
+],
+"CA-05": [
+{
+"D": "KXHOUSERACE-CA05-26-D",
+"R": "KXHOUSERACE-CA05-26-R",
+"event": "KXHOUSERACE-CA05-26",
+"mult": 1.0
+}
+],
+"CA-08": [
+{
+"D": "KXHOUSERACE-CA08-26-D",
+"R": "KXHOUSERACE-CA08-26-R",
+"event": "KXHOUSERACE-CA08-26",
+"mult": 1.0
+}
+],
+"CA-09": [
+{
+"D": "HOUSECA9-26-D",
+"R": "HOUSECA9-26-R",
+"event": "HOUSECA9-26",
+"mult": 1.0
+}
+],
+"CA-10": [
+{
+"D": "KXHOUSERACE-CA10-26-D",
+"R": "KXHOUSERACE-CA10-26-R",
+"event": "KXHOUSERACE-CA10-26",
+"mult": 1.0
+}
+],
+"CA-13": [
+{
+"D": "HOUSECA13-26-D",
+"R": "HOUSECA13-26-R",
+"event": "HOUSECA13-26",
+"mult": 1.0
+}
+],
+"CA-15": [
+{
+"D": "KXHOUSERACE-CA15-26-D",
+"R": "KXHOUSERACE-CA15-26-R",
+"event": "KXHOUSERACE-CA15-26",
+"mult": 1.0
+}
+],
+"CA-16": [
+{
+"D": "KXHOUSERACE-CA16-26-D",
+"R": "KXHOUSERACE-CA16-26-R",
+"event": "KXHOUSERACE-CA16-26",
+"mult": 1.0
+}
+],
+"CA-17": [
+{
+"D": "KXHOUSERACE-CA17-26-D",
+"R": "KXHOUSERACE-CA17-26-R",
+"event": "KXHOUSERACE-CA17-26",
+"mult": 1.0
+}
+],
+"CA-18": [
+{
+"D": "KXHOUSERACE-CA18-26-D",
+"R": "KXHOUSERACE-CA18-26-R",
+"event": "KXHOUSERACE-CA18-26",
+"mult": 1.0
+}
+],
+"CA-19": [
+{
+"D": "KXHOUSERACE-CA19-26-D",
+"R": "KXHOUSERACE-CA19-26-R",
+"event": "KXHOUSERACE-CA19-26",
+"mult": 1.0
+}
+],
+"CA-20": [
+{
+"D": "KXHOUSERACE-CA20-26-D",
+"R": "KXHOUSERACE-CA20-26-R",
+"event": "KXHOUSERACE-CA20-26",
+"mult": 1.0
+}
+],
+"CA-21": [
+{
+"D": "HOUSECA21-26-D",
+"R": "HOUSECA21-26-R",
+"event": "HOUSECA21-26",
+"mult": 1.0
+}
+],
+"CA-22": [
+{
+"D": "HOUSECA22-26-D",
+"R": "HOUSECA22-26-R",
+"event": "HOUSECA22-26",
+"mult": 1.0
+}
+],
+"CA-23": [
+{
+"D": "KXHOUSERACE-CA23-26-D",
+"R": "KXHOUSERACE-CA23-26-R",
+"event": "KXHOUSERACE-CA23-26",
+"mult": 1.0
+}
+],
+"CA-24": [
+{
+"D": "KXHOUSERACE-CA24-26-D",
+"R": "KXHOUSERACE-CA24-26-R",
+"event": "KXHOUSERACE-CA24-26",
+"mult": 1.0
+}
+],
+"CA-25": [
+{
+"D": "KXHOUSERACE-CA25-26-D",
+"R": "KXHOUSERACE-CA25-26-R",
+"event": "KXHOUSERACE-CA25-26",
+"mult": 1.0
+}
+],
+"CA-26": [
+{
+"D": "KXHOUSERACE-CA26-26-D",
+"R": "KXHOUSERACE-CA26-26-R",
+"event": "KXHOUSERACE-CA26-26",
+"mult": 1.0
+}
+],
+"CA-27": [
+{
+"D": "HOUSECA27-26-D",
+"R": "HOUSECA27-26-R",
+"event": "HOUSECA27-26",
+"mult": 1.0
+}
+],
+"CA-28": [
+{
+"D": "KXHOUSERACE-CA28-26-D",
+"R": "KXHOUSERACE-CA28-26-R",
+"event": "KXHOUSERACE-CA28-26",
+"mult": 1.0
+}
+],
+"CA-30": [
+{
+"D": "KXHOUSERACE-CA30-26-D",
+"R": "KXHOUSERACE-CA30-26-R",
+"event": "KXHOUSERACE-CA30-26",
+"mult": 1.0
+}
+],
+"CA-31": [
+{
+"D": "KXHOUSERACE-CA31-26-D",
+"R": "KXHOUSERACE-CA31-26-R",
+"event": "KXHOUSERACE-CA31-26",
+"mult": 1.0
+}
+],
+"CA-32": [
+{
+"D": "KXHOUSERACE-CA32-26-D",
+"R": "KXHOUSERACE-CA32-26-R",
+"event": "KXHOUSERACE-CA32-26",
+"mult": 1.0
+}
+],
+"CA-33": [
+{
+"D": "KXHOUSERACE-CA33-26-D",
+"R": "KXHOUSERACE-CA33-26-R",
+"event": "KXHOUSERACE-CA33-26",
+"mult": 1.0
+}
+],
+"CA-35": [
+{
+"D": "KXHOUSERACE-CA35-26-D",
+"R": "KXHOUSERACE-CA35-26-R",
+"event": "KXHOUSERACE-CA35-26",
+"mult": 1.0
+}
+],
+"CA-36": [
+{
+"D": "KXHOUSERACE-CA36-26-D",
+"R": "KXHOUSERACE-CA36-26-R",
+"event": "KXHOUSERACE-CA36-26",
+"mult": 1.0
+}
+],
+"CA-38": [
+{
+"D": "KXHOUSERACE-CA38-26-D",
+"R": "KXHOUSERACE-CA38-26-R",
+"event": "KXHOUSERACE-CA38-26",
+"mult": 1.0
+}
+],
+"CA-39": [
+{
+"D": "KXHOUSERACE-CA39-26-D",
+"R": "KXHOUSERACE-CA39-26-R",
+"event": "KXHOUSERACE-CA39-26",
+"mult": 1.0
+}
+],
+"CA-41": [
+{
+"D": "HOUSECA41-26-D",
+"R": "HOUSECA41-26-R",
+"event": "HOUSECA41-26",
+"mult": 1.0
+}
+],
+"CA-42": [
+{
+"D": "KXHOUSERACE-CA42-26-D",
+"R": "KXHOUSERACE-CA42-26-R",
+"event": "KXHOUSERACE-CA42-26",
+"mult": 1.0
+}
+],
+"CA-43": [
+{
+"D": "KXHOUSERACE-CA43-26-D",
+"R": "KXHOUSERACE-CA43-26-R",
+"event": "KXHOUSERACE-CA43-26",
+"mult": 1.0
+}
+],
+"CA-44": [
+{
+"D": "KXHOUSERACE-CA44-26-D",
+"R": "KXHOUSERACE-CA44-26-R",
+"event": "KXHOUSERACE-CA44-26",
+"mult": 1.0
+}
+],
+"CA-45": [
+{
+"D": "HOUSECA45-26-D",
+"R": "HOUSECA45-26-R",
+"event": "HOUSECA45-26",
+"mult": 1.0
+}
+],
+"CA-46": [
+{
+"D": "KXHOUSERACE-CA46-26-D",
+"R": "KXHOUSERACE-CA46-26-R",
+"event": "KXHOUSERACE-CA46-26",
+"mult": 1.0
+}
+],
+"CA-47": [
+{
+"D": "HOUSECA47-26-D",
+"R": "HOUSECA47-26-R",
+"event": "HOUSECA47-26",
+"mult": 1.0
+}
+],
+"CA-48": [
+{
+"D": "KXHOUSERACE-CA48-26-D",
+"R": "KXHOUSERACE-CA48-26-R",
+"event": "KXHOUSERACE-CA48-26",
+"mult": 1.0
+}
+],
+"CA-49": [
+{
+"D": "HOUSECA49-26-D",
+"R": "HOUSECA49-26-R",
+"event": "HOUSECA49-26",
+"mult": 1.0
+}
+],
+"CA-50": [
+{
+"D": "KXHOUSERACE-CA50-26-D",
+"R": "KXHOUSERACE-CA50-26-R",
+"event": "KXHOUSERACE-CA50-26",
+"mult": 1.0
+}
+],
+"CA-51": [
+{
+"D": "KXHOUSERACE-CA51-26-D",
+"R": "KXHOUSERACE-CA51-26-R",
+"event": "KXHOUSERACE-CA51-26",
+"mult": 1.0
+}
+],
+"CA-52": [
+{
+"D": "KXHOUSERACE-CA52-26-D",
+"R": "KXHOUSERACE-CA52-26-R",
+"event": "KXHOUSERACE-CA52-26",
+"mult": 1.0
+}
+],
+"CO-03": [
+{
+"D": "HOUSECO3-26-D",
+"R": "HOUSECO3-26-R",
+"event": "HOUSECO3-26",
+"mult": 1.0
+}
+],
+"CO-04": [
+{
+"D": "KXHOUSERACE-CO04-26-D",
+"R": "KXHOUSERACE-CO04-26-R",
+"event": "KXHOUSERACE-CO04-26",
+"mult": 1.0
+}
+],
+"CO-05": [
+{
+"D": "KXHOUSERACE-CO05-26-D",
+"R": "KXHOUSERACE-CO05-26-R",
+"event": "KXHOUSERACE-CO05-26",
+"mult": 1.0
+}
+],
+"CO-08": [
+{
+"D": "HOUSECO8-26-D",
+"R": "HOUSECO8-26-R",
+"event": "HOUSECO8-26",
+"mult": 1.0
+}
+],
+"CT-01": [
+{
+"D": "KXHOUSERACE-CT01-26-D",
+"R": "KXHOUSERACE-CT01-26-R",
+"event": "KXHOUSERACE-CT01-26",
+"mult": 1.0
+}
+],
+"CT-03": [
+{
+"D": "KXHOUSERACE-CT03-26-D",
+"R": "KXHOUSERACE-CT03-26-R",
+"event": "KXHOUSERACE-CT03-26",
+"mult": 1.0
+}
+],
+"CT-05": [
+{
+"D": "HOUSECT5-26-D",
+"R": "HOUSECT5-26-R",
+"event": "HOUSECT5-26",
+"mult": 1.0
+}
+],
+"FL-07": [
+{
+"D": "KXHOUSERACE-FL07-26-D",
+"R": "KXHOUSERACE-FL07-26-R",
+"event": "KXHOUSERACE-FL07-26",
+"mult": 1.0
+}
+],
+"FL-09": [
+{
+"D": "KXHOUSERACE-FL09-26-D",
+"R": "KXHOUSERACE-FL09-26-R",
+"event": "KXHOUSERACE-FL09-26",
+"mult": 1.0
+}
+],
+"FL-13": [
+{
+"D": "HOUSEFL13-26-D",
+"R": "HOUSEFL13-26-R",
+"event": "HOUSEFL13-26",
+"mult": 1.0
+}
+],
+"FL-26": [
+{
+"D": "KXHOUSERACE-FL26-26-D",
+"R": "KXHOUSERACE-FL26-26-R",
+"event": "KXHOUSERACE-FL26-26",
+"mult": 1.0
+}
+],
+"FL-27": [
+{
+"D": "KXHOUSERACE-FL27-26-D",
+"R": "KXHOUSERACE-FL27-26-R",
+"event": "KXHOUSERACE-FL27-26",
+"mult": 1.0
+}
+],
+"GA-01": [
+{
+"D": "KXHOUSERACE-GA01-26-D",
+"R": "KXHOUSERACE-GA01-26-R",
+"event": "KXHOUSERACE-GA01-26",
+"mult": 1.0
+}
+],
+"GA-12": [
+{
+"D": "KXHOUSERACE-GA12-26-D",
+"R": "KXHOUSERACE-GA12-26-R",
+"event": "KXHOUSERACE-GA12-26",
+"mult": 1.0
+}
+],
+"HI-01": [
+{
+"D": "KXHOUSERACE-HI01-26-D",
+"R": "KXHOUSERACE-HI01-26-R",
+"event": "KXHOUSERACE-HI01-26",
+"mult": 1.0
+}
+],
+"HI-02": [
+{
+"D": "KXHOUSERACE-HI02-26-D",
+"R": "KXHOUSERACE-HI02-26-R",
+"event": "KXHOUSERACE-HI02-26",
+"mult": 1.0
+}
+],
+"IA-01": [
+{
+"D": "HOUSEIA1-26-D",
+"R": "HOUSEIA1-26-R",
+"event": "HOUSEIA1-26",
+"mult": 1.0
+}
+],
+"IA-02": [
+{
+"D": "KXHOUSERACE-IA02-26-D",
+"R": "KXHOUSERACE-IA02-26-R",
+"event": "KXHOUSERACE-IA02-26",
+"mult": 1.0
+}
+],
+"IA-03": [
+{
+"D": "HOUSEIA3-26-D",
+"R": "HOUSEIA3-26-R",
+"event": "HOUSEIA3-26",
+"mult": 1.0
+}
+],
+"IA-04": [
+{
+"D": "KXHOUSERACE-IA04-26-D",
+"R": "KXHOUSERACE-IA04-26-R",
+"event": "KXHOUSERACE-IA04-26",
+"mult": 1.0
+}
+],
+"ID-01": [
+{
+"D": "KXHOUSERACE-ID01-26-D",
+"R": "KXHOUSERACE-ID01-26-R",
+"event": "KXHOUSERACE-ID01-26",
+"mult": 1.0
+}
+],
+"ID-02": [
+{
+"D": "KXHOUSERACE-ID02-26-D",
+"R": "KXHOUSERACE-ID02-26-R",
+"event": "KXHOUSERACE-ID02-26",
+"mult": 1.0
+}
+],
+"IL-10": [
+{
+"D": "KXHOUSERACE-IL10-26-D",
+"R": "KXHOUSERACE-IL10-26-R",
+"event": "KXHOUSERACE-IL10-26",
+"mult": 1.0
+}
+],
+"IL-13": [
+{
+"D": "KXHOUSERACE-IL13-26-D",
+"R": "KXHOUSERACE-IL13-26-R",
+"event": "KXHOUSERACE-IL13-26",
+"mult": 1.0
+}
+],
+"IN-01": [
+{
+"D": "HOUSEIN1-26-D",
+"R": "HOUSEIN1-26-R",
+"event": "HOUSEIN1-26",
+"mult": 1.0
+}
+],
+"IN-02": [
+{
+"D": "KXHOUSERACE-IN02-26-D",
+"R": "KXHOUSERACE-IN02-26-R",
+"event": "KXHOUSERACE-IN02-26",
+"mult": 1.0
+}
+],
+"IN-03": [
+{
+"D": "KXHOUSERACE-IN03-26-D",
+"R": "KXHOUSERACE-IN03-26-R",
+"event": "KXHOUSERACE-IN03-26",
+"mult": 1.0
+}
+],
+"IN-04": [
+{
+"D": "KXHOUSERACE-IN04-26-D",
+"R": "KXHOUSERACE-IN04-26-R",
+"event": "KXHOUSERACE-IN04-26",
+"mult": 1.0
+}
+],
+"IN-05": [
+{
+"D": "KXHOUSERACE-IN05-26-D",
+"R": "KXHOUSERACE-IN05-26-R",
+"event": "KXHOUSERACE-IN05-26",
+"mult": 1.0
+}
+],
+"IN-06": [
+{
+"D": "KXHOUSERACE-IN06-26-D",
+"R": "KXHOUSERACE-IN06-26-R",
+"event": "KXHOUSERACE-IN06-26",
+"mult": 1.0
+}
+],
+"IN-09": [
+{
+"D": "KXHOUSERACE-IN09-26-D",
+"R": "KXHOUSERACE-IN09-26-R",
+"event": "KXHOUSERACE-IN09-26",
+"mult": 1.0
+}
+],
+"KS-01": [
+{
+"D": "KXHOUSERACE-KS01-26-D",
+"R": "KXHOUSERACE-KS01-26-R",
+"event": "KXHOUSERACE-KS01-26",
+"mult": 1.0
+}
+],
+"KS-02": [
+{
+"D": "KXHOUSERACE-KS02-26-D",
+"R": "KXHOUSERACE-KS02-26-R",
+"event": "KXHOUSERACE-KS02-26",
+"mult": 1.0
+}
+],
+"KS-04": [
+{
+"D": "KXHOUSERACE-KS04-26-D",
+"R": "KXHOUSERACE-KS04-26-R",
+"event": "KXHOUSERACE-KS04-26",
+"mult": 1.0
+}
+],
+"MD-01": [
+{
+"D": "KXHOUSERACE-MD01-26-D",
+"R": "KXHOUSERACE-MD01-26-R",
+"event": "KXHOUSERACE-MD01-26",
+"mult": 1.0
+}
+],
+"MD-06": [
+{
+"D": "KXHOUSERACE-MD06-26-D",
+"R": "KXHOUSERACE-MD06-26-R",
+"event": "KXHOUSERACE-MD06-26",
+"mult": 1.0
+}
+],
+"ME-02": [
+{
+"D": "HOUSEME2-26-D",
+"R": "HOUSEME2-26-R",
+"event": "HOUSEME2-26",
+"mult": 1.0
+}
+],
+"MI-01": [
+{
+"D": "KXHOUSERACE-MI01-26-D",
+"R": "KXHOUSERACE-MI01-26-R",
+"event": "KXHOUSERACE-MI01-26",
+"mult": 1.0
+}
+],
+"MI-03": [
+{
+"D": "HOUSEMI3-26-D",
+"R": "HOUSEMI3-26-R",
+"event": "HOUSEMI3-26",
+"mult": 1.0
+}
+],
+"MI-04": [
+{
+"D": "HOUSEMI4-26-D",
+"R": "HOUSEMI4-26-R",
+"event": "HOUSEMI4-26",
+"mult": 1.0
+}
+],
+"MI-05": [
+{
+"D": "KXHOUSERACE-MI05-26-D",
+"R": "KXHOUSERACE-MI05-26-R",
+"event": "KXHOUSERACE-MI05-26",
+"mult": 1.0
+}
+],
+"MI-07": [
+{
+"D": "HOUSEMI7-26-D",
+"R": "HOUSEMI7-26-R",
+"event": "HOUSEMI7-26",
+"mult": 1.0
+}
+],
+"MI-08": [
+{
+"D": "HOUSEMI8-26-D",
+"R": "HOUSEMI8-26-R",
+"event": "HOUSEMI8-26",
+"mult": 1.0
+}
+],
+"MI-09": [
+{
+"D": "KXHOUSERACE-MI09-26-D",
+"R": "KXHOUSERACE-MI09-26-R",
+"event": "KXHOUSERACE-MI09-26",
+"mult": 1.0
+}
+],
+"MI-10": [
+{
+"D": "HOUSEMI10-26-D",
+"R": "HOUSEMI10-26-R",
+"event": "HOUSEMI10-26",
+"mult": 1.0
+}
+],
+"MN-01": [
+{
+"D": "KXHOUSERACE-MN01-26-D",
+"R": "KXHOUSERACE-MN01-26-R",
+"event": "KXHOUSERACE-MN01-26",
+"mult": 1.0
+}
+],
+"MN-02": [
+{
+"D": "HOUSEMN2-26-D",
+"R": "HOUSEMN2-26-R",
+"event": "HOUSEMN2-26",
+"mult": 1.0
+}
+],
+"MN-03": [
+{
+"D": "KXHOUSERACE-MN03-26-D",
+"R": "KXHOUSERACE-MN03-26-R",
+"event": "KXHOUSERACE-MN03-26",
+"mult": 1.0
+}
+],
+"MN-04": [
+{
+"D": "KXHOUSERACE-MN04-26-D",
+"R": "KXHOUSERACE-MN04-26-R",
+"event": "KXHOUSERACE-MN04-26",
+"mult": 1.0
+}
+],
+"MN-05": [
+{
+"D": "KXHOUSERACE-MN05-26-D",
+"R": "KXHOUSERACE-MN05-26-R",
+"event": "KXHOUSERACE-MN05-26",
+"mult": 1.0
+}
+],
+"MN-06": [
+{
+"D": "KXHOUSERACE-MN06-26-D",
+"R": "KXHOUSERACE-MN06-26-R",
+"event": "KXHOUSERACE-MN06-26",
+"mult": 1.0
+}
+],
+"MN-07": [
+{
+"D": "KXHOUSERACE-MN07-26-D",
+"R": "KXHOUSERACE-MN07-26-R",
+"event": "KXHOUSERACE-MN07-26",
+"mult": 1.0
+}
+],
+"MN-08": [
+{
+"D": "KXHOUSERACE-MN08-26-D",
+"R": "KXHOUSERACE-MN08-26-R",
+"event": "KXHOUSERACE-MN08-26",
+"mult": 1.0
+}
+],
+"MO-02": [
+{
+"D": "KXHOUSERACE-MO02-26-D",
+"R": "KXHOUSERACE-MO02-26-R",
+"event": "KXHOUSERACE-MO02-26",
+"mult": 1.0
+}
+],
+"MO-03": [
+{
+"D": "KXHOUSERACE-MO03-26-D",
+"R": "KXHOUSERACE-MO03-26-R",
+"event": "KXHOUSERACE-MO03-26",
+"mult": 1.0
+}
+],
+"MS-03": [
+{
+"D": "KXHOUSERACE-MS03-26-D",
+"R": "KXHOUSERACE-MS03-26-R",
+"event": "KXHOUSERACE-MS03-26",
+"mult": 1.0
+}
+],
+"MT-01": [
+{
+"D": "HOUSEMT1-26-D",
+"R": "HOUSEMT1-26-R",
+"event": "HOUSEMT1-26",
+"mult": 1.0
+}
+],
+"MT-02": [
+{
+"D": "KXHOUSERACE-MT02-26-D",
+"R": "KXHOUSERACE-MT02-26-R",
+"event": "KXHOUSERACE-MT02-26",
+"mult": 1.0
+}
+],
+"NC-01": [
+{
+"D": "HOUSENC1-26-D",
+"R": "HOUSENC1-26-R",
+"event": "HOUSENC1-26",
+"mult": 1.0
+}
+],
+"NC-03": [
+{
+"D": "KXHOUSERACE-NC03-26-D",
+"R": "KXHOUSERACE-NC03-26-R",
+"event": "KXHOUSERACE-NC03-26",
+"mult": 1.0
+}
+],
+"NC-05": [
+{
+"D": "KXHOUSERACE-NC05-26-D",
+"R": "KXHOUSERACE-NC05-26-R",
+"event": "KXHOUSERACE-NC05-26",
+"mult": 1.0
+}
+],
+"NC-06": [
+{
+"D": "KXHOUSERACE-NC06-26-D",
+"R": "KXHOUSERACE-NC06-26-R",
+"event": "KXHOUSERACE-NC06-26",
+"mult": 1.0
+}
+],
+"NC-07": [
+{
+"D": "KXHOUSERACE-NC07-26-D",
+"R": "KXHOUSERACE-NC07-26-R",
+"event": "KXHOUSERACE-NC07-26",
+"mult": 1.0
+}
+],
+"NC-08": [
+{
+"D": "KXHOUSERACE-NC08-26-D",
+"R": "KXHOUSERACE-NC08-26-R",
+"event": "KXHOUSERACE-NC08-26",
+"mult": 1.0
+}
+],
+"NC-09": [
+{
+"D": "KXHOUSERACE-NC09-26-D",
+"R": "KXHOUSERACE-NC09-26-R",
+"event": "KXHOUSERACE-NC09-26",
+"mult": 1.0
+}
+],
+"NC-10": [
+{
+"D": "KXHOUSERACE-NC10-26-D",
+"R": "KXHOUSERACE-NC10-26-R",
+"event": "KXHOUSERACE-NC10-26",
+"mult": 1.0
+}
+],
+"NC-13": [
+{
+"D": "KXHOUSERACE-NC13-26-D",
+"R": "KXHOUSERACE-NC13-26-R",
+"event": "KXHOUSERACE-NC13-26",
+"mult": 1.0
+}
+],
+"NC-14": [
+{
+"D": "KXHOUSERACE-NC14-26-D",
+"R": "KXHOUSERACE-NC14-26-R",
+"event": "KXHOUSERACE-NC14-26",
+"mult": 1.0
+}
+],
+"NE-01": [
+{
+"D": "KXHOUSERACE-NE01-26-D",
+"R": "KXHOUSERACE-NE01-26-R",
+"event": "KXHOUSERACE-NE01-26",
+"mult": 1.0
+}
+],
+"NE-02": [
+{
+"D": "HOUSENE2-26-D",
+"R": "HOUSENE2-26-R",
+"event": "HOUSENE2-26",
+"mult": 1.0
+}
+],
+"NE-03": [
+{
+"D": "KXHOUSERACE-NE03-26-D",
+"R": "KXHOUSERACE-NE03-26-R",
+"event": "KXHOUSERACE-NE03-26",
+"mult": 1.0
+}
+],
+"NH-02": [
+{
+"D": "KXHOUSERACE-NH02-26-D",
+"R": "KXHOUSERACE-NH02-26-R",
+"event": "KXHOUSERACE-NH02-26",
+"mult": 1.0
+}
+],
+"NJ-02": [
+{
+"D": "KXHOUSERACE-NJ02-26-D",
+"R": "KXHOUSERACE-NJ02-26-R",
+"event": "KXHOUSERACE-NJ02-26",
+"mult": 1.0
+}
+],
+"NJ-09": [
+{
+"D": "HOUSENJ9-26-D",
+"R": "HOUSENJ9-26-R",
+"event": "HOUSENJ9-26",
+"mult": 1.0
+}
+],
+"NM-01": [
+{
+"D": "KXHOUSERACE-NM01-26-D",
+"R": "KXHOUSERACE-NM01-26-R",
+"event": "KXHOUSERACE-NM01-26",
+"mult": 1.0
+}
+],
+"NM-02": [
+{
+"D": "HOUSENM2-26-D",
+"R": "HOUSENM2-26-R",
+"event": "HOUSENM2-26",
+"mult": 1.0
+}
+],
+"NM-03": [
+{
+"D": "KXHOUSERACE-NM03-26-D",
+"R": "KXHOUSERACE-NM03-26-R",
+"event": "KXHOUSERACE-NM03-26",
+"mult": 1.0
+}
+],
+"NV-01": [
+{
+"D": "HOUSENV1-26-D",
+"R": "HOUSENV1-26-R",
+"event": "HOUSENV1-26",
+"mult": 1.0
+}
+],
+"NV-02": [
+{
+"D": "KXHOUSERACE-NV02-26-D",
+"R": "KXHOUSERACE-NV02-26-R",
+"event": "KXHOUSERACE-NV02-26",
+"mult": 1.0
+}
+],
+"NV-03": [
+{
+"D": "HOUSENV3-26-D",
+"R": "HOUSENV3-26-R",
+"event": "HOUSENV3-26",
+"mult": 1.0
+}
+],
+"NV-04": [
+{
+"D": "HOUSENV4-26-D",
+"R": "HOUSENV4-26-R",
+"event": "HOUSENV4-26",
+"mult": 1.0
+}
+],
+"NY-01": [
+{
+"D": "KXHOUSERACE-NY01-26-D",
+"R": "KXHOUSERACE-NY01-26-R",
+"event": "KXHOUSERACE-NY01-26",
+"mult": 1.0
+}
+],
+"NY-02": [
+{
+"D": "KXHOUSERACE-NY02-26-D",
+"R": "KXHOUSERACE-NY02-26-R",
+"event": "KXHOUSERACE-NY02-26",
+"mult": 1.0
+}
+],
+"NY-03": [
+{
+"D": "HOUSENY3-26-D",
+"R": "HOUSENY3-26-R",
+"event": "HOUSENY3-26",
+"mult": 1.0
+}
+],
+"NY-04": [
+{
+"D": "HOUSENY4-26-D",
+"R": "HOUSENY4-26-R",
+"event": "HOUSENY4-26",
+"mult": 1.0
+}
+],
+"NY-17": [
+{
+"D": "HOUSENY17-26-D",
+"R": "HOUSENY17-26-R",
+"event": "HOUSENY17-26",
+"mult": 1.0
+}
+],
+"NY-21": [
+{
+"D": "KXHOUSERACE-NY21-26-D",
+"R": "KXHOUSERACE-NY21-26-R",
+"event": "KXHOUSERACE-NY21-26",
+"mult": 1.0
+}
+],
+"NY-24": [
+{
+"D": "KXHOUSERACE-NY24-26-D",
+"R": "KXHOUSERACE-NY24-26-R",
+"event": "KXHOUSERACE-NY24-26",
+"mult": 1.0
+}
+],
+"OH-07": [
+{
+"D": "KXHOUSERACE-OH07-26-D",
+"R": "KXHOUSERACE-OH07-26-R",
+"event": "KXHOUSERACE-OH07-26",
+"mult": 1.0
+}
+],
+"OH-08": [
+{
+"D": "KXHOUSERACE-OH08-26-D",
+"R": "KXHOUSERACE-OH08-26-R",
+"event": "KXHOUSERACE-OH08-26",
+"mult": 1.0
+}
+],
+"OH-09": [
+{
+"D": "HOUSEOH9-26-D",
+"R": "HOUSEOH9-26-R",
+"event": "HOUSEOH9-26",
+"mult": 1.0
+}
+],
+"OH-10": [
+{
+"D": "KXHOUSERACE-OH10-26-D",
+"R": "KXHOUSERACE-OH10-26-R",
+"event": "KXHOUSERACE-OH10-26",
+"mult": 1.0
+}
+],
+"OK-01": [
+{
+"D": "KXHOUSERACE-OK01-26-D",
+"R": "KXHOUSERACE-OK01-26-R",
+"event": "KXHOUSERACE-OK01-26",
+"mult": 1.0
+}
+],
+"OK-05": [
+{
+"D": "KXHOUSERACE-OK05-26-D",
+"R": "KXHOUSERACE-OK05-26-R",
+"event": "KXHOUSERACE-OK05-26",
+"mult": 1.0
+}
+],
+"OR-01": [
+{
+"D": "KXHOUSERACE-OR01-26-D",
+"R": "KXHOUSERACE-OR01-26-R",
+"event": "KXHOUSERACE-OR01-26",
+"mult": 1.0
+}
+],
+"OR-02": [
+{
+"D": "KXHOUSERACE-OR02-26-D",
+"R": "KXHOUSERACE-OR02-26-R",
+"event": "KXHOUSERACE-OR02-26",
+"mult": 1.0
+}
+],
+"OR-03": [
+{
+"D": "KXHOUSERACE-OR03-26-D",
+"R": "KXHOUSERACE-OR03-26-R",
+"event": "KXHOUSERACE-OR03-26",
+"mult": 1.0
+}
+],
+"OR-04": [
+{
+"D": "KXHOUSERACE-OR04-26-D",
+"R": "KXHOUSERACE-OR04-26-R",
+"event": "KXHOUSERACE-OR04-26",
+"mult": 1.0
+}
+],
+"OR-05": [
+{
+"D": "HOUSEOR5-26-D",
+"R": "HOUSEOR5-26-R",
+"event": "HOUSEOR5-26",
+"mult": 1.0
+}
+],
+"OR-06": [
+{
+"D": "KXHOUSERACE-OR06-26-D",
+"R": "KXHOUSERACE-OR06-26-R",
+"event": "KXHOUSERACE-OR06-26",
+"mult": 1.0
+}
+],
+"PA-01": [
+{
+"D": "HOUSEPA1-26-D",
+"R": "HOUSEPA1-26-R",
+"event": "HOUSEPA1-26",
+"mult": 1.0
+}
+],
+"PA-11": [
+{
+"D": "KXHOUSERACE-PA11-26-D",
+"R": "KXHOUSERACE-PA11-26-R",
+"event": "KXHOUSERACE-PA11-26",
+"mult": 1.0
+}
+],
+"PA-16": [
+{
+"D": "KXHOUSERACE-PA16-26-D",
+"R": "KXHOUSERACE-PA16-26-R",
+"event": "KXHOUSERACE-PA16-26",
+"mult": 1.0
+}
+],
+"SC-01": [
+{
+"D": "KXHOUSERACE-SC01-26-D",
+"R": "KXHOUSERACE-SC01-26-R",
+"event": "KXHOUSERACE-SC01-26",
+"mult": 1.0
+}
+],
+"SC-02": [
+{
+"D": "KXHOUSERACE-SC02-26-D",
+"R": "KXHOUSERACE-SC02-26-R",
+"event": "KXHOUSERACE-SC02-26",
+"mult": 1.0
+}
+],
+"SD-01": [
+{
+"D": "KXHOUSERACE-SDAL-26-D",
+"R": "KXHOUSERACE-SDAL-26-R",
+"event": "KXHOUSERACE-SDAL-26",
+"mult": 1.0
+}
+],
+"TN-02": [
+{
+"D": "KXHOUSERACE-TN02-26-D",
+"R": "KXHOUSERACE-TN02-26-R",
+"event": "KXHOUSERACE-TN02-26",
+"mult": 1.0
+}
+],
+"TN-03": [
+{
+"D": "KXHOUSERACE-TN03-26-D",
+"R": "KXHOUSERACE-TN03-26-R",
+"event": "KXHOUSERACE-TN03-26",
+"mult": 1.0
+}
+],
+"TN-04": [
+{
+"D": "KXHOUSERACE-TN04-26-D",
+"R": "KXHOUSERACE-TN04-26-R",
+"event": "KXHOUSERACE-TN04-26",
+"mult": 1.0
+}
+],
+"TN-05": [
+{
+"D": "KXHOUSERACE-TN05-26-D",
+"R": "KXHOUSERACE-TN05-26-R",
+"event": "KXHOUSERACE-TN05-26",
+"mult": 1.0
+}
+],
+"TN-06": [
+{
+"D": "KXHOUSERACE-TN06-26-D",
+"R": "KXHOUSERACE-TN06-26-R",
+"event": "KXHOUSERACE-TN06-26",
+"mult": 1.0
+}
+],
+"TN-07": [
+{
+"D": "KXHOUSERACE-TN07-26-D",
+"R": "KXHOUSERACE-TN07-26-R",
+"event": "KXHOUSERACE-TN07-26",
+"mult": 1.0
+}
+],
+"TN-08": [
+{
+"D": "KXHOUSERACE-TN08-26-D",
+"R": "KXHOUSERACE-TN08-26-R",
+"event": "KXHOUSERACE-TN08-26",
+"mult": 1.0
+}
+],
+"TN-09": [
+{
+"D": "KXHOUSERACE-TN09-26-D",
+"R": "KXHOUSERACE-TN09-26-R",
+"event": "KXHOUSERACE-TN09-26",
+"mult": 1.0
+}
+],
+"TX-02": [
+{
+"D": "KXHOUSERACE-TX02-26-D",
+"R": "KXHOUSERACE-TX02-26-R",
+"event": "KXHOUSERACE-TX02-26",
+"mult": 1.0
+}
+],
+"TX-03": [
+{
+"D": "KXHOUSERACE-TX03-26-D",
+"R": "KXHOUSERACE-TX03-26-R",
+"event": "KXHOUSERACE-TX03-26",
+"mult": 1.0
+}
+],
+"TX-04": [
+{
+"D": "KXHOUSERACE-TX04-26-D",
+"R": "KXHOUSERACE-TX04-26-R",
+"event": "KXHOUSERACE-TX04-26",
+"mult": 1.0
+}
+],
+"TX-05": [
+{
+"D": "KXHOUSERACE-TX05-26-D",
+"R": "KXHOUSERACE-TX05-26-R",
+"event": "KXHOUSERACE-TX05-26",
+"mult": 1.0
+}
+],
+"TX-06": [
+{
+"D": "KXHOUSERACE-TX06-26-D",
+"R": "KXHOUSERACE-TX06-26-R",
+"event": "KXHOUSERACE-TX06-26",
+"mult": 1.0
+}
+],
+"TX-08": [
+{
+"D": "KXHOUSERACE-TX08-26-D",
+"R": "KXHOUSERACE-TX08-26-R",
+"event": "KXHOUSERACE-TX08-26",
+"mult": 1.0
+}
+],
+"TX-09": [
+{
+"D": "KXHOUSETX9-26-D",
+"R": "KXHOUSETX9-26-R",
+"event": "KXHOUSETX9-26",
+"mult": 1.0
+}
+],
+"TX-10": [
+{
+"D": "KXHOUSERACE-TX10-26-D",
+"R": "KXHOUSERACE-TX10-26-R",
+"event": "KXHOUSERACE-TX10-26",
+"mult": 1.0
+}
+],
+"TX-11": [
+{
+"D": "KXHOUSERACE-TX11-26-D",
+"R": "KXHOUSERACE-TX11-26-R",
+"event": "KXHOUSERACE-TX11-26",
+"mult": 1.0
+}
+],
+"TX-12": [
+{
+"D": "KXHOUSERACE-TX12-26-D",
+"R": "KXHOUSERACE-TX12-26-R",
+"event": "KXHOUSERACE-TX12-26",
+"mult": 1.0
+}
+],
+"TX-13": [
+{
+"D": "KXHOUSERACE-TX13-26-D",
+"R": "KXHOUSERACE-TX13-26-R",
+"event": "KXHOUSERACE-TX13-26",
+"mult": 1.0
+}
+],
+"TX-14": [
+{
+"D": "KXHOUSERACE-TX14-26-D",
+"R": "KXHOUSERACE-TX14-26-R",
+"event": "KXHOUSERACE-TX14-26",
+"mult": 1.0
+}
+],
+"TX-15": [
+{
+"D": "HOUSETX15-26-D",
+"R": "HOUSETX15-26-R",
+"event": "HOUSETX15-26",
+"mult": 1.0
+}
+],
+"TX-17": [
+{
+"D": "KXHOUSERACE-TX17-26-D",
+"R": "KXHOUSERACE-TX17-26-R",
+"event": "KXHOUSERACE-TX17-26",
+"mult": 1.0
+}
+],
+"TX-19": [
+{
+"D": "KXHOUSERACE-TX19-26-D",
+"R": "KXHOUSERACE-TX19-26-R",
+"event": "KXHOUSERACE-TX19-26",
+"mult": 1.0
+}
+],
+"TX-21": [
+{
+"D": "KXHOUSERACE-TX21-26-D",
+"R": "KXHOUSERACE-TX21-26-R",
+"event": "KXHOUSERACE-TX21-26",
+"mult": 1.0
+}
+],
+"TX-22": [
+{
+"D": "KXHOUSERACE-TX22-26-D",
+"R": "KXHOUSERACE-TX22-26-R",
+"event": "KXHOUSERACE-TX22-26",
+"mult": 1.0
+}
+],
+"TX-23": [
+{
+"D": "KXHOUSERACE-TX23-26-D",
+"R": "KXHOUSERACE-TX23-26-R",
+"event": "KXHOUSERACE-TX23-26",
+"mult": 1.0
+}
+],
+"TX-24": [
+{
+"D": "KXHOUSERACE-TX24-26-D",
+"R": "KXHOUSERACE-TX24-26-R",
+"event": "KXHOUSERACE-TX24-26",
+"mult": 1.0
+}
+],
+"TX-25": [
+{
+"D": "KXHOUSERACE-TX25-26-D",
+"R": "KXHOUSERACE-TX25-26-R",
+"event": "KXHOUSERACE-TX25-26",
+"mult": 1.0
+}
+],
+"TX-26": [
+{
+"D": "KXHOUSERACE-TX26-26-D",
+"R": "KXHOUSERACE-TX26-26-R",
+"event": "KXHOUSERACE-TX26-26",
+"mult": 1.0
+}
+],
+"TX-27": [
+{
+"D": "KXHOUSERACE-TX27-26-D",
+"R": "KXHOUSERACE-TX27-26-R",
+"event": "KXHOUSERACE-TX27-26",
+"mult": 1.0
+}
+],
+"TX-28": [
+{
+"D": "HOUSETX28-26-D",
+"R": "HOUSETX28-26-R",
+"event": "HOUSETX28-26",
+"mult": 1.0
+}
+],
+"TX-31": [
+{
+"D": "KXHOUSERACE-TX31-26-D",
+"R": "KXHOUSERACE-TX31-26-R",
+"event": "KXHOUSERACE-TX31-26",
+"mult": 1.0
+}
+],
+"TX-32": [
+{
+"D": "KXHOUSETX32-26-D",
+"R": "KXHOUSETX32-26-R",
+"event": "KXHOUSETX32-26",
+"mult": 1.0
+}
+],
+"TX-35": [
+{
+"D": "KXHOUSETX35-26-D",
+"R": "KXHOUSETX35-26-R",
+"event": "KXHOUSETX35-26",
+"mult": 1.0
+}
+],
+"TX-36": [
+{
+"D": "KXHOUSERACE-TX36-26-D",
+"R": "KXHOUSERACE-TX36-26-R",
+"event": "KXHOUSERACE-TX36-26",
+"mult": 1.0
+}
+],
+"TX-37": [
+{
+"D": "KXHOUSERACE-TX37-26-D",
+"R": "KXHOUSERACE-TX37-26-R",
+"event": "KXHOUSERACE-TX37-26",
+"mult": 1.0
+}
+],
+"TX-38": [
+{
+"D": "KXHOUSERACE-TX38-26-D",
+"R": "KXHOUSERACE-TX38-26-R",
+"event": "KXHOUSERACE-TX38-26",
+"mult": 1.0
+}
+],
+"UT-01": [
+{
+"D": "KXHOUSEUT01-26-D",
+"R": "KXHOUSEUT01-26-R",
+"event": "KXHOUSEUT01-26",
+"mult": 1.0
+}
+],
+"UT-02": [
+{
+"D": "KXHOUSEUT02-26-D",
+"R": "KXHOUSEUT02-26-R",
+"event": "KXHOUSEUT02-26",
+"mult": 1.0
+}
+],
+"UT-03": [
+{
+"D": "KXHOUSEUT03-26-D",
+"R": "KXHOUSEUT03-26-R",
+"event": "KXHOUSEUT03-26",
+"mult": 1.0
+}
+],
+"UT-04": [
+{
+"D": "KXHOUSERACE-UT04-26-D",
+"R": "KXHOUSERACE-UT04-26-R",
+"event": "KXHOUSERACE-UT04-26",
+"mult": 1.0
+}
+],
+"VA-01": [
+{
+"D": "HOUSEVA1-26-D",
+"R": "HOUSEVA1-26-R",
+"event": "HOUSEVA1-26",
+"mult": 1.0
+}
+],
+"VA-02": [
+{
+"D": "HOUSEVA2-26-D",
+"R": "HOUSEVA2-26-R",
+"event": "HOUSEVA2-26",
+"mult": 1.0
+}
+],
+"VA-05": [
+{
+"D": "KXHOUSERACE-VA05-26-D",
+"R": "KXHOUSERACE-VA05-26-R",
+"event": "KXHOUSERACE-VA05-26",
+"mult": 1.0
+}
+],
+"WA-01": [
+{
+"D": "KXHOUSERACE-WA01-26-D",
+"R": "KXHOUSERACE-WA01-26-R",
+"event": "KXHOUSERACE-WA01-26",
+"mult": 1.0
+}
+],
+"WA-02": [
+{
+"D": "KXHOUSERACE-WA02-26-D",
+"R": "KXHOUSERACE-WA02-26-R",
+"event": "KXHOUSERACE-WA02-26",
+"mult": 1.0
+}
+],
+"WA-03": [
+{
+"D": "HOUSEWA3-26-D",
+"R": "HOUSEWA3-26-R",
+"event": "HOUSEWA3-26",
+"mult": 1.0
+}
+],
+"WA-04": [
+{
+"D": "KXHOUSERACE-WA04-26-D",
+"R": "KXHOUSERACE-WA04-26-R",
+"event": "KXHOUSERACE-WA04-26",
+"mult": 1.0
+}
+],
+"WA-05": [
+{
+"D": "KXHOUSERACE-WA05-26-D",
+"R": "KXHOUSERACE-WA05-26-R",
+"event": "KXHOUSERACE-WA05-26",
+"mult": 1.0
+}
+],
+"WA-06": [
+{
+"D": "KXHOUSERACE-WA06-26-D",
+"R": "KXHOUSERACE-WA06-26-R",
+"event": "KXHOUSERACE-WA06-26",
+"mult": 1.0
+}
+],
+"WA-07": [
+{
+"D": "KXHOUSERACE-WA07-26-D",
+"R": "KXHOUSERACE-WA07-26-R",
+"event": "KXHOUSERACE-WA07-26",
+"mult": 1.0
+}
+],
+"WA-08": [
+{
+"D": "KXHOUSEWA8-26-D",
+"R": "KXHOUSEWA8-26-R",
+"event": "KXHOUSEWA8-26",
+"mult": 1.0
+}
+],
+"WA-09": [
+{
+"D": "KXHOUSERACE-WA09-26-D",
+"R": "KXHOUSERACE-WA09-26-R",
+"event": "KXHOUSERACE-WA09-26",
+"mult": 1.0
+}
+],
+"WA-10": [
+{
+"D": "KXHOUSERACE-WA10-26-D",
+"R": "KXHOUSERACE-WA10-26-R",
+"event": "KXHOUSERACE-WA10-26",
+"mult": 1.0
+}
+],
+"WI-01": [
+{
+"D": "HOUSEWI1-26-D",
+"R": "HOUSEWI1-26-R",
+"event": "HOUSEWI1-26",
+"mult": 1.0
+}
+],
+"WI-03": [
+{
+"D": "HOUSEWI3-26-D",
+"R": "HOUSEWI3-26-R",
+"event": "HOUSEWI3-26",
+"mult": 1.0
+}
+],
+"WI-07": [
+{
+"D": "KXHOUSERACE-WI07-26-D",
+"R": "KXHOUSERACE-WI07-26-R",
+"event": "KXHOUSERACE-WI07-26",
+"mult": 1.0
+}
+],
+"WI-08": [
+{
+"D": "KXHOUSERACE-WI08-26-D",
+"R": "KXHOUSERACE-WI08-26-R",
+"event": "KXHOUSERACE-WI08-26",
+"mult": 1.0
+}
+],
+"WY-01": [
+{
+"D": "KXHOUSERACE-WYAL-26-D",
+"R": "KXHOUSERACE-WYAL-26-R",
+"event": "KXHOUSERACE-WYAL-26",
+"mult": 1.0
+}
+]
+}

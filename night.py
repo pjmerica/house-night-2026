@@ -1,7 +1,17 @@
 """Every race live (House, Senate, Governor): NYT's count vs our model, and the desk's v0 projection, every 60 s.
 
 Writes live.json (now) and hist.json (each race's path through the night) to the orphan branch `live`; index.html
-reads them. No markets here (user call 2026-11-03: a separate thing).
+reads them. House races also get Kalshi's prices (kalshi_map.json, from kalshi_map.py; user 2026-11-03: "wire up as
+many kalshi markets as you can ... highlighting what to buy"):
+  ask              the cheapest way to buy a side: YES on its market, or NO on the other side's (1 - its YES bid)
+  edge             our chance - ask - Kalshi's taker fee (0.07 x multiplier x P(1-P)), per $1 contract
+  pay up to        the highest ask that still leaves a 3c edge after the fee
+  FLIP             the desk's rule (live_project.is_flip): our chance 45%+, edge 5c+, ask 8-40c, 20%+ counted,
+                   and (House only) the count read pointing the same way as the pick. A district's projection leans on
+                   our pre-election model for longer than the desk's county-by-county one (no county detail, and most
+                   states have no count history), so a pick against the count is the model arguing with a market that
+                   sees the count: tagged "against", never a FLIP (first pass, 2026-11-03: NJ-02 D+4.6 at 70% counted,
+                   projection R 92%, Kalshi R 5c).
 
 Per race (the desk's projector v0, live_project.project, with our margin model as the start):
   count estimate   c = margin now + (1 - p) * g,   sd = hypot((1 - p) * g_sd, 0.4)
@@ -29,6 +39,13 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 NYT = "https://static01.nyt.com/elections-assets/pages/data/2026-11-03/results-{}.json"
 UA = {"User-Agent": "house-night-2026 (github.com/pjmerica/house-night-2026)"}
 PASS = 60
+KALSHI = "https://api.elections.kalshi.com/trade-api/v2"
+FLIP_MIN_P, FLIP_MIN_EDGE, FLIP_MAX_ASK, FLIP_MIN_PCT = 0.45, 0.05, 0.40, 20.0
+# House only: no FLIP under 8c. The 2024 flips that paid were bought at 15-33c; a district price of a few cents with
+# votes counted is usually the market seeing which counties are out (OH-09 2026-11-03: Merrin +18.6 at 47% counted,
+# Kaptur 96c with Toledo's Lucas County still to come), which a district total can't show
+FLIP_MIN_ASK = 0.08
+BOARD_EDGE = 0.03
 SLUG = {"AL": "alabama", "AK": "alaska", "AZ": "arizona", "AR": "arkansas", "CA": "california", "CO": "colorado",
         "CT": "connecticut", "DE": "delaware", "FL": "florida", "GA": "georgia", "HI": "hawaii", "ID": "idaho",
         "IL": "illinois", "IN": "indiana", "IA": "iowa", "KS": "kansas", "KY": "kentucky", "LA": "louisiana",
@@ -133,6 +150,59 @@ def project(race, t, lean, model_sd, floor):
     return dict(mu=mu, sd=sd, p=phi(mu / sd), c=c, csd=csd)
 
 
+def kalshi_quotes(tickers):
+    """{ticker: dict(bid, ask, status)} for every ticker, 50 a request."""
+    out = {}
+    for i in range(0, len(tickers), 50):
+        url = f"{KALSHI}/markets?tickers={','.join(tickers[i:i + 50])}&limit=100"
+        with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=30) as r:
+            for m in json.loads(r.read()).get("markets") or []:
+                def f(k):
+                    return float(m[k]) if m.get(k) not in (None, "") else None
+                out[m["ticker"]] = dict(bid=f("yes_bid_dollars"), ask=f("yes_ask_dollars"), status=m.get("status"))
+        time.sleep(0.12)
+    return out
+
+
+def kfee(p, mult):
+    return 0.07 * mult * p * (1 - p)
+
+
+def pay_up_to(prob, mult):
+    """The highest ask with prob - ask - fee >= BOARD_EDGE, or None."""
+    if prob - 0.01 - kfee(0.01, mult) < BOARD_EDGE:
+        return None
+    lo, hi = 0.0, 1.0
+    for _ in range(40):
+        mid = (lo + hi) / 2
+        if prob - mid - kfee(mid, mult) >= BOARD_EDGE:
+            lo = mid
+        else:
+            hi = mid
+    return round(lo, 3)
+
+
+def kalshi_sides(events, q):
+    """events: the district's Kalshi events (kalshi_map.json). -> {D/R: dict(bid, ask, how, mult)} with the cheapest
+    buy of each side across them; a side whose markets aren't trading is left out."""
+    out = {}
+    for ev in events:
+        for side, other in (("D", "R"), ("R", "D")):
+            a, b = q.get(ev.get(side)) or {}, q.get(ev.get(other)) or {}
+            opts = []
+            if a.get("status") == "active" and a.get("ask") and 0 < a["ask"] < 1:
+                opts.append((a["ask"], "YES " + ev[side]))
+            if b.get("status") == "active" and b.get("bid") and 0 < b["bid"] < 1:
+                opts.append((round(1 - b["bid"], 4), "NO " + ev[other]))
+            if not opts:
+                continue
+            ask, how = min(opts)
+            if side not in out or ask < out[side]["ask"]:
+                out[side] = dict(bid=a.get("bid") if a.get("status") == "active" else None, ask=ask, how=how,
+                                 mult=ev.get("mult", 1.0))
+    return out
+
+
 def r_(x, n=2):
     return None if x is None else round(x, n)
 
@@ -163,6 +233,9 @@ def main():
     a = ap.parse_args()
     bench = json.load(open(os.path.join(HERE, "house_bench.json"), encoding="utf-8"))
     races = bench["races"]
+    kmap_path = os.path.join(HERE, "kalshi_map.json")
+    kmap = json.load(open(kmap_path, encoding="utf-8")) if os.path.exists(kmap_path) else {}
+    tickers = sorted({ev[s] for evs in kmap.values() for ev in evs for s in ("D", "R") if ev.get(s)})
     keys = {(r["office"], r["k"]): r for r in races}
     out_dir = a.state or HERE
     hist = {}
@@ -183,6 +256,12 @@ def main():
                     errors.pop(st, None)
                 elif err:
                     errors[st] = f"{now} {err}"
+        try:
+            quotes = kalshi_quotes(tickers) if tickers else {}
+            errors.pop("kalshi", None)
+        except Exception as e:  # noqa: BLE001
+            errors["kalshi"] = f"{now} {str(e)[:120]}"
+            quotes = {}
         rows = []
         for race in races:
             nr = cache.get(race["st"], {}).get((race["office"], race["k"]))
@@ -198,11 +277,29 @@ def main():
                            c=r_(pr["c"]) if counting else None, csd=r_(pr["csd"]) if counting else None,
                            ou=r_(pr["c"] - race["m"]) if counting else None,
                            sh=r_(pr["mu"] - race["m"]) if counting else None)
+            ks = kalshi_sides(kmap.get(race["k"], []), quotes) if race["office"] == "H" and pr and not row["call"] else {}
+            if ks:
+                row["k"] = {s: dict(bid=v["bid"], ask=v["ask"], how=v["how"]) for s, v in ks.items()}
+                best = None
+                for s, v in ks.items():
+                    prob = pr["p"] if s == "D" else 1 - pr["p"]
+                    fee = kfee(v["ask"], v["mult"])
+                    edge = prob - v["ask"] - fee
+                    if best is None or edge > best["edge"]:
+                        best = dict(side=s, ask=v["ask"], fee=r_(fee, 4), edge=r_(edge, 4), ours=r_(prob, 4),
+                                    upto=pay_up_to(prob, v["mult"]), how=v["how"])
+                c = pr["c"] if counting else None
+                best["against"] = bool(c is not None and abs(c) >= 0.5 and (c > 0) != (best["side"] == "D"))
+                best["flip"] = bool(best["ours"] >= FLIP_MIN_P and best["edge"] >= FLIP_MIN_EDGE
+                                    and FLIP_MIN_ASK <= best["ask"] <= FLIP_MAX_ASK and (t["pct"] if t else 0) >= FLIP_MIN_PCT
+                                    and not best["against"])
+                row["best"] = best
             rows.append(row)
             if counting:
                 h = hist.setdefault(race["id"], [])
-                pt = [now, row["pct"], row["m"], row.get("mu"), row.get("p")]
-                if not h or h[-1][1:3] != pt[1:3] or h[-1][4] != pt[4]:
+                pt = [now, row["pct"], row["m"], row.get("mu"), row.get("p"),
+                      ((row.get("k") or {}).get("D") or {}).get("ask")]
+                if not h or h[-1][1:3] != pt[1:3] or h[-1][4] != pt[4] or h[-1][5:6] != pt[5:6]:
                     h.append(pt)
                     del h[:-200]
         data = dict(generated=now, model_sd=bench["model_sd"], races=rows, errors=errors,
@@ -215,7 +312,9 @@ def main():
         except Exception as e:
             print("publish:", e, flush=True)
         n = sum(1 for x in rows if x.get("c") is not None)
-        print(now, f"{len(cache)} states, {n} races counting, {len(errors)} errors, {time.time() - t0:.1f}s", flush=True)
+        nb = sum(1 for x in rows if (x.get("best") or {}).get("edge", -1) >= BOARD_EDGE)
+        print(now, f"{len(cache)} states, {n} races counting, {len(quotes)} Kalshi quotes, {nb} on the board, "
+              f"{len(errors)} errors, {time.time() - t0:.1f}s", flush=True)
         if a.once or time.time() > end:
             break
         time.sleep(max(5, PASS - (time.time() - t0)))

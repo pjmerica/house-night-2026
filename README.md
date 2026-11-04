@@ -1,7 +1,8 @@
 # Election night 2026: every race vs our model
 
-A standalone page (separate from polling-agg's election-night data desk, no markets): every House, Senate and
-Governor race on a 3D map, each against the 2026 margin model, with a projection that updates as votes come in.
+A standalone page (separate from polling-agg's election-night data desk): every House, Senate and Governor race on a
+3D map, each against the 2026 margin model, with a projection that updates as votes come in, and a Kalshi board for
+the House races.
 
 - `night.py` (GitHub Actions workflow "Every race live", started by hand: `gh workflow run night.yml`; one job
   runs up to 340 minutes) reads NYT's 50 state results pages every 60 s and writes `live.json` (every race now)
@@ -20,3 +21,13 @@ Governor race on a 3D map, each against the 2026 margin model, with a projection
   tables) and `house_geo.js` (polling-agg's real 2026 district lines). Re-run only if those change.
 
 Local test: `py night.py --once`, then open `index.html?local=1`.
+
+## Kalshi board (House)
+
+`kalshi_map.py` finds Kalshi's House markets (the KXHOUSERACE series plus the older HOUSE{ST}{N}-26 events; 220
+districts on 2026-11-03 night, the rest already settled) -> `kalshi_map.json`. Every pass `night.py` reads their
+prices and, per race: the cheapest way to buy each side (YES on it or NO on the other), edge = our chance - ask -
+Kalshi's taker fee, pay up to = the highest ask still 3c+ after the fee, and FLIP = the desk's rule (our chance 45%+,
+edge 5c+, ask 8-40c, 20%+ counted) with the count read pointing the same way as the pick. Picks against the count are
+tagged: that edge is our pre-election model arguing with a market that sees the votes. The House projection sees only
+district totals (not which counties are out), so check NYT's district map and the live book before buying.

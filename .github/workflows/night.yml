@@ -61,3 +61,28 @@ jobs:
           else
             echo "not dispatching (ran ${ran}s)"
           fi
+      # A copy of everything on the live branch so far, committed to the branch `record`, which is never force-pushed, so
+      # its history keeps every copy for good (user 2026-11-05: the record must be saved forever). The live branch is one
+      # commit, amended and force-pushed, so it keeps no history of its own. Files are only added or updated here, never
+      # removed, and a failed push (say, after a failed clone) loses nothing.
+      - name: Keep a copy of the record
+        if: ${{ always() }}
+        continue-on-error: true
+        timeout-minutes: 10
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          url="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          if git ls-remote --exit-code --heads "$url" record >/dev/null; then
+            git clone -q --depth 1 --branch record "$url" rec
+          else
+            git init -q -b record rec
+            git -C rec remote add origin "$url"
+          fi
+          tar -C state --exclude=.git -cf - . | tar -C rec -xf -
+          git -C rec config user.name "record-keeper"
+          git -C rec config user.email "actions@users.noreply.github.com"
+          git -C rec add -A
+          if git -C rec diff --cached --quiet; then echo "nothing new"; exit 0; fi
+          git -C rec commit -q -m "record $(date -u +%Y-%m-%dT%H:%MZ) run ${GITHUB_RUN_ID}"
+          git -C rec push -q origin HEAD:record

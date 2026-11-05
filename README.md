@@ -57,3 +57,7 @@ out). Every district's NYT file, by county, is recorded by polling-agg's cloud j
 `kalshi_prices.csv` on the same branch (since 2026-11-04 2:55 pm ET): every House market's bid, ask, last price, volume and open interest each time its quote changes. Kalshi's minute and hourly history is in the `kalshi-*` assets of polling-agg's release `election-night-2026` (`Election night simulator/scripts/kalshi_backfill.py`, re-run when the count is done).
 
 `review.html` replays the whole House through the night from recordings (`build_review.py`: NYT's state pages from the release `election-night-2026`, Kalshi's minute candles from its `kalshi-minutes-*` asset, `hist.json`, `live.json`): expected seats, what the board said at each moment, and the profit if every recommendation was bought. Re-run when the count is done; the page says what is recorded and what is recomputed.
+
+## The record, kept for good
+
+The branch `live` is one commit, amended and force-pushed every pass, so it has no history. At the end of every job the workflow copies everything on it to the branch `record` and commits it there (files are added or updated, never removed). `record` is protected against force-pushes and deletion, so its history holds every copy of the night and the late count. Started 2026-11-05 (user: the record must be saved forever); the first commit is a copy taken by hand that day.

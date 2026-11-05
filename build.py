@@ -53,6 +53,8 @@ def races():
         if d and others and (others[0].get("win") or 0) > (d.get("win") or 0) + 0.25:
             d = others[0]                                # a DEM-slot independent the model favours over a DEM
         rep = max(reps, key=lambda c: c.get("win") or 0) if reps else None
+        if key in OPPOSITION_FIX and d:                  # who the votes are counted for; the published margin and win chance stay
+            d = dict(d, name=OPPOSITION_FIX[key], party="DEM")
         kind = "ok"
         if st == "LA" and office == "H":
             kind = "jungle"                              # Nov 3 is round one; the seat may go to a Dec 12 runoff
@@ -65,6 +67,11 @@ def races():
                         win=d.get("win") if d and rep else None,
                         inc=r.get("incumbent_party")))
     return out
+
+
+# The forecast named the wrong opposition. WI-06: Michael Thurow, an independent who drew 1% (a May poll merged two matchups, "Grothman
+# 61, Smith 39, Thurow 45"); the Democratic nominee Brad Smith was the real opponent, so the count read Grothman by 51, not 9.
+OPPOSITION_FIX = {"WI-06": "Brad Smith"}
 
 
 def lean_tables():

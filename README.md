@@ -18,9 +18,10 @@ the House races.
 - Louisiana's House races are its Nov 3 round (runoff Dec 12): shown with the leader, no projection. Same-party
   races (California / Washington top two) and uncontested seats have no projection.
 - Ranked-choice races (Alaska; Maine's Senate and House races) count ONE candidate per side, its leader in first
-  choices (`side_of`, since 2026-11-12; rows carry `rc: true`). Before that a party's candidates were added
+  choices (`side_of`, since 2026-11-12; rows carry `rc: "first"`). Before that a party's candidates were added
   together: Alaska Governor read R +0.2 while the Democrat led the top Republican by 21. The model's margin is
-  the final round's head to head, so score these races only once the rounds are run.
+  the final round's head to head, so score these races only once the rounds are run. When a state runs them
+  (Alaska: Nov 18) NYT's totals become the final round's, the row carries `rc: "final"` and the card says so.
 - `build.py` makes `house_bench.js/json` (model margins from polling-agg `docs/forecast_data.js`, the late-count
   tables) and `house_geo.js` (polling-agg's real 2026 district lines). Re-run only if those change.
 

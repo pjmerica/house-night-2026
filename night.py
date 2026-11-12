@@ -113,7 +113,14 @@ def nyt_races(st, d, bench_keys):
 
 
 def ranked_choice(r):
-    return (r.get("tabulation_method") or "") == "ranked-choice"
+    """False, "first" (first choices so far) or "final" (the rounds have been run).
+
+    Once a state runs its rounds NYT's file carries them (`rounds`, the last with round_type "final") and its
+    vote totals become the final round's: the two finalists' counts, everyone else 0 (checked on Alaska's
+    2024 House race: Begich 164,861, Peltola 156,985). So the same reading gives the final head to head."""
+    if (r.get("tabulation_method") or "") != "ranked-choice":
+        return False
+    return "final" if any(rd.get("round_type") == "final" for rd in r.get("rounds") or []) else "first"
 
 
 def side_of(r, race):
@@ -500,7 +507,7 @@ def main():
                        dv=t["d"] if t else 0, rv=t["r"] if t else 0, m=r_(margin), call=t["call"] if t else None,
                        lead=t["lead"] if t else None, nyt=bool(nr))
             if t and t.get("rc"):
-                row["rc"] = True        # ranked-choice: first choices of each side's leader (side_of)
+                row["rc"] = t["rc"]     # ranked-choice: "first" choices of each side's leader (side_of), or the "final" round
             if pr:
                 row.update(mu=r_(pr["mu"]), sd=r_(pr["sd"]), p=r_(pr["p"], 4),
                            c=r_(pr["c"]) if counting else None, csd=r_(pr["csd"]) if counting else None,

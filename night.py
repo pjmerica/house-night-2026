@@ -112,15 +112,22 @@ def nyt_races(st, d, bench_keys):
     return out
 
 
-def tally(r, race):
-    """-> dict(d, r, tot, pct, exp, call) for the race's two sides (matched by last name, else DEM / GOP)."""
-    meta = r.get("candidate_metadata") or {}
-    unit = next((u for u in r.get("reporting_units") or [] if u.get("level") in ("state", "district")),
-                (r.get("reporting_units") or [None])[0])
-    if not unit:
-        return None
+def ranked_choice(r):
+    return (r.get("tabulation_method") or "") == "ranked-choice"
 
-    def side(cid):
+
+def side_of(r, race):
+    """-> side(candidate id) -> "D" / "R" / None: the race's two sides, matched by last name, else DEM / GOP.
+
+    Ranked-choice races (Alaska, Maine's federal races; 2026-11-12): each side is ONE candidate, its leader in
+    first choices, as on the polling-agg desk. Adding a party's candidates together is not a count anybody
+    reports: Alaska Governor read R +0.2 here (Wilson + Bronson + Taylor against Kreiss-Tomkins) while he led
+    Wilson by 21, and the last-name match put both Sullivans of Alaska's Senate race on one side. The model's
+    margin is the final round's head to head, which the state publishes only when it runs the rounds; until
+    NYT's file carries them these are first choices."""
+    meta = r.get("candidate_metadata") or {}
+
+    def party_side(cid):
         m = meta.get(cid) or {}
         ln = (m.get("last_name") or "").lower()
         if race.get("dl") and ln and (ln in race["dl"].lower() or race["dl"].lower() in ln):
@@ -129,6 +136,28 @@ def tally(r, race):
             return "R"
         p = (m.get("party") or {}).get("nyt_id")
         return "D" if p == "DEM" and race.get("dp") == "DEM" else "R" if p == "GOP" else None
+    if not ranked_choice(r):
+        return party_side
+    units = r.get("reporting_units") or []
+    top = [u for u in units if u.get("level") in ("state", "district")] or units
+    votes = {}
+    for u in top:
+        for c in u.get("candidates") or []:
+            votes[c["nyt_id"]] = votes.get(c["nyt_id"], 0) + ((c.get("votes") or {}).get("total") or 0)
+    keep = {}
+    for cid in sorted(votes, key=lambda k: -votes[k]):
+        keep.setdefault(party_side(cid), cid)
+    return lambda cid: next((s for s in ("D", "R") if keep.get(s) == cid), None)
+
+
+def tally(r, race):
+    """-> dict(d, r, tot, pct, exp, call, rc) for the race's two sides (side_of)."""
+    meta = r.get("candidate_metadata") or {}
+    unit = next((u for u in r.get("reporting_units") or [] if u.get("level") in ("state", "district")),
+                (r.get("reporting_units") or [None])[0])
+    if not unit:
+        return None
+    side = side_of(r, race)
     dv = rv = tot = 0
     lead = (None, -1)
     for c in unit.get("candidates") or []:
@@ -144,7 +173,7 @@ def tally(r, race):
     if won:
         call = side(won[0]) or ((meta.get(won[0]) or {}).get("last_name") or won[0])
     return dict(d=dv, r=rv, tot=tot, pct=float(unit.get("eevp") or 0), exp=unit.get("total_expected_vote") or 0,
-                call=call, lead=lead[0] if tot else None, upd=r.get("updated_at"))
+                call=call, lead=lead[0] if tot else None, upd=r.get("updated_at"), rc=ranked_choice(r))
 
 
 def project(race, t, lean, model_sd, floor):
@@ -247,17 +276,7 @@ def district_units(d, race):
     r = (d.get("races") or [None])[0]
     if not r:
         return {}
-    meta = r.get("candidate_metadata") or {}
-
-    def side(cid):
-        m = meta.get(cid) or {}
-        ln = (m.get("last_name") or "").lower()
-        if race.get("dl") and ln and (ln in race["dl"].lower() or race["dl"].lower() in ln):
-            return "D"
-        if race.get("rl") and ln and (ln in race["rl"].lower() or race["rl"].lower() in ln):
-            return "R"
-        p = (m.get("party") or {}).get("nyt_id")
-        return "D" if p == "DEM" and race.get("dp") == "DEM" else "R" if p == "GOP" else None
+    side = side_of(r, race)
     out = {}
     for u in r.get("reporting_units") or []:
         if u.get("level") not in ("county", "township"):
@@ -480,6 +499,8 @@ def main():
             row = dict(id=race["id"], pct=r_(t["pct"], 1) if t else None, v=t["tot"] if t else 0,
                        dv=t["d"] if t else 0, rv=t["r"] if t else 0, m=r_(margin), call=t["call"] if t else None,
                        lead=t["lead"] if t else None, nyt=bool(nr))
+            if t and t.get("rc"):
+                row["rc"] = True        # ranked-choice: first choices of each side's leader (side_of)
             if pr:
                 row.update(mu=r_(pr["mu"]), sd=r_(pr["sd"]), p=r_(pr["p"], 4),
                            c=r_(pr["c"]) if counting else None, csd=r_(pr["csd"]) if counting else None,

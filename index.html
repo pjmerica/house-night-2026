@@ -289,7 +289,7 @@ function fill(r) {
 function card(r, full) {
   const L = r.L, two = (L.dv || 0) + (L.rv || 0);
   let h = `<h5>${esc(short(r))}${L.call ? ` <span class="called ${L.call === "D" ? "pos" : L.call === "R" ? "neg" : ""}">called: ${esc(L.call === "D" ? r.dl : L.call === "R" ? r.rl : L.call)}</span>` : ""}</h5>`;
-  h += `<div class="sub">${esc(r.d || "–")} (${esc((r.dp || "").slice(0, 3))}) vs ${esc(r.r || "–")} (REP)${r.kind === "jungle" ? " · Louisiana's Nov 3 round: a runoff Dec 12 if nobody passes 50%" : r.kind === "same-party" ? " · same-party race: no projection" : r.kind === "uncontested" ? " · uncontested" : ""}</div>`;
+  h += `<div class="sub">${esc(r.d || "–")} (${esc((r.dp || "").slice(0, 3))}) vs ${esc(r.r || "–")} (REP)${r.kind === "jungle" ? " · Louisiana's Nov 3 round: a runoff Dec 12 if nobody passes 50%" : r.kind === "same-party" ? " · same-party race: no projection" : r.kind === "uncontested" ? " · uncontested" : ""}${L.rc ? " · ranked-choice race: first choices of each side's leading candidate, later rounds can change the result" : ""}</div>`;
   h += `<div class="kv"><span>Counted</span><b>${L.pct == null ? "not reporting" : L.pct.toFixed(0) + "% · " + fmtInt(L.v) + " votes"}</b></div>`;
   if (L.pct != null) h += `<div class="cbar"><i style="width:${Math.min(100, L.pct)}%"></i></div>`;
   h += `<div class="kv">`;
